@@ -5,12 +5,14 @@ class GridOptions<T> {
   final List<Object> columns; // List<ColumnDef<T,dynamic>> | List<ColumnDefGroup<T>>
   final List<GridFeature> features;
   final String Function(T row, int index)? getRowId;
+  final List<T> Function(T row)? getSubRows;
   final bool debugMode;
 
   const GridOptions({
     required this.columns,
     this.features = const [],
     this.getRowId,
+    this.getSubRows,
     this.debugMode = false,
   });
 

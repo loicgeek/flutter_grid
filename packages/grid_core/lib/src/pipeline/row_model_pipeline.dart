@@ -1,6 +1,7 @@
 import '../models/column_def.dart';
 import '../models/grid_state.dart';
 import '../models/row_model.dart';
+import '../features/grid_feature.dart';
 import 'filter_stage.dart';
 import 'sort_stage.dart';
 
@@ -38,9 +39,13 @@ class RowModelPipeline<T> {
 
     // 3. Grouping
     List<RowModel<T>> groupedRows;
-    final groupingFeature = controller.options.features
-        .where((f) => f.featureId == 'grouping')
-        .firstOrNull; // Could cast to GroupingFeature if imported
+    GridFeature? groupingFeature;
+    for (final f in controller.options.features) {
+      if (f.featureId == 'grouping') {
+        groupingFeature = f;
+        break;
+      }
+    }
     final isManualGrouping = groupingFeature?.manual ?? false;
 
     if (state.grouping.isNotEmpty && !isManualGrouping) {
@@ -72,6 +77,25 @@ class RowModelPipeline<T> {
     final bottomPinned = allRawRows
         .where((r) => state.rowPinning.bottom.contains(r.id))
         .toList();
+
+    // Remove from pageRows if keepPinnedRows is false
+    GridFeature? rowPinningFeature;
+    for (final f in controller.options.features) {
+      if (f.featureId == 'rowPinning') {
+        rowPinningFeature = f;
+        break;
+      }
+    }
+    // Assume keepPinnedRows is true by default unless specified otherwise by feature.
+    // In RowPinningFeature, it defaults to true.
+    final keepPinnedRows = (rowPinningFeature as dynamic)?.keepPinnedRows ?? true;
+    
+    if (!keepPinnedRows) {
+      pageRows = pageRows.where((r) {
+        return !state.rowPinning.top.contains(r.id) &&
+               !state.rowPinning.bottom.contains(r.id);
+      }).toList();
+    }
 
     final totalRows = expandedRows.length;
     final pageSize = state.pagination.pageSize;

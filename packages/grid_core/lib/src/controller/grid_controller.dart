@@ -335,6 +335,7 @@ class GridController<T> {
       columns: options.flatColumns,
       controller: this,
       getRowId: options.getRowId,
+      getSubRows: options.getSubRows,
     ).build(data);
   }
 
