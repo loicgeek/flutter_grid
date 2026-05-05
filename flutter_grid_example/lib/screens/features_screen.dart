@@ -14,7 +14,7 @@ class FeaturesScreen extends StatefulWidget {
 
 class _FeaturesScreenState extends State<FeaturesScreen>
     with SingleTickerProviderStateMixin {
-  late final _tabController = TabController(length: 3, vsync: this);
+  late final _tabController = TabController(length: 6, vsync: this);
 
   @override
   void dispose() {
@@ -29,17 +29,28 @@ class _FeaturesScreenState extends State<FeaturesScreen>
         title: const Text('Features'),
         bottom: TabBar(
           controller: _tabController,
+          isScrollable: true,
           tabs: const [
             Tab(text: 'Pinning'),
             Tab(text: 'Custom Cells'),
             Tab(text: 'Theming'),
+            Tab(text: 'Grouping'),
+            Tab(text: 'Expanding'),
+            Tab(text: 'Columns'),
           ],
         ),
       ),
       body: TabBarView(
         physics: NeverScrollableScrollPhysics(),
         controller: _tabController,
-        children: const [_PinningTab(), _CustomCellsTab(), _ThemingTab()],
+        children: const [
+          _PinningTab(),
+          _CustomCellsTab(),
+          _ThemingTab(),
+          _GroupingTab(),
+          _ExpandingTab(),
+          _ColumnsTab(),
+        ],
       ),
     );
   }
@@ -332,14 +343,7 @@ class _CustomCellsTabState extends State<_CustomCellsTab> {
   }
 }
 
-Color _deptColor(Department d) => switch (d) {
-  Department.engineering => Colors.blue,
-  Department.product => Colors.purple,
-  Department.design => Colors.pink,
-  Department.marketing => Colors.orange,
-  Department.sales => Colors.green,
-  Department.support => Colors.teal,
-};
+
 
 // ── Theming ────────────────────────────────────────────────────────────────
 
@@ -414,5 +418,432 @@ class _ThemingTabState extends State<_ThemingTab> {
         showColumnBorders: true,
       ),
     );
+  }
+}
+
+// ── Grouping ────────────────────────────────────────────────────────────────
+
+class _GroupingTab extends StatefulWidget {
+  const _GroupingTab();
+
+  @override
+  State<_GroupingTab> createState() => _GroupingTabState();
+}
+
+class _GroupingTabState extends State<_GroupingTab> {
+  late final _controller = GridController<Employee>(
+    options: GridOptions(
+      columns: [
+        ColumnDef<Employee, String>.accessor(
+          id: 'name',
+          accessorFn: (e) => e.name,
+          header: 'Name',
+        ),
+        ColumnDef<Employee, String>.accessor(
+          id: 'department',
+          accessorFn: (e) => e.department.name,
+          header: 'Department',
+        ),
+        ColumnDef<Employee, String>.accessor(
+          id: 'role',
+          accessorFn: (e) => e.role,
+          header: 'Role',
+        ),
+        ColumnDef<Employee, double>.accessor(
+          id: 'salary',
+          accessorFn: (e) => e.salary,
+          header: 'Salary',
+          columnType: ColumnType.money,
+          textAlignIndex: 1,
+        ),
+      ],
+      features: const [GroupingFeature()],
+    ),
+  )..setData(Employee.sample);
+
+  String? _activeGroup;
+
+  void _setGrouping(String? columnId) {
+    setState(() => _activeGroup = columnId);
+    if (columnId == null) {
+      _controller.dispatch(const SetGroupingCommand([]));
+    } else {
+      _controller.dispatch(SetGroupingCommand([columnId]));
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(12),
+          child: Wrap(
+            spacing: 8,
+            children: [
+              ActionChip(
+                label: const Text('Group by Department'),
+                backgroundColor: _activeGroup == 'department'
+                    ? Theme.of(context).colorScheme.primaryContainer
+                    : null,
+                onPressed: () => _setGrouping(
+                    _activeGroup == 'department' ? null : 'department'),
+              ),
+              ActionChip(
+                label: const Text('Group by Role'),
+                backgroundColor: _activeGroup == 'role'
+                    ? Theme.of(context).colorScheme.primaryContainer
+                    : null,
+                onPressed: () =>
+                    _setGrouping(_activeGroup == 'role' ? null : 'role'),
+              ),
+              ActionChip(
+                label: const Text('Clear Grouping'),
+                onPressed: () => _setGrouping(null),
+              ),
+            ],
+          ),
+        ),
+        if (_activeGroup != null)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            child: Text(
+              'Tap a group row to expand/collapse it.',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+        Expanded(
+          child: FlutterGrid<Employee>(
+            controller: _controller,
+            fillWidth: true,
+            showToolbar: false,
+            showFilterBar: false,
+            showPagination: false,
+            onRowTap: (row) {
+              if (row.isGrouped) {
+                _controller.dispatch(
+                  SetRowExpandedCommand(row.id, !row.isExpanded),
+                );
+              }
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Expanding ──────────────────────────────────────────────────────────────
+
+class _TreeEmployee {
+  final Employee employee;
+  final List<_TreeEmployee> reports;
+
+  const _TreeEmployee(this.employee, [this.reports = const []]);
+}
+
+class _ExpandingTab extends StatefulWidget {
+  const _ExpandingTab();
+
+  @override
+  State<_ExpandingTab> createState() => _ExpandingTabState();
+}
+
+class _ExpandingTabState extends State<_ExpandingTab> {
+  static final _treeData = [
+    _TreeEmployee(
+      Employee.sample[9], // James Wright — Principal Engineer
+      [
+        _TreeEmployee(Employee.sample[0]), // Alice Martin
+        _TreeEmployee(Employee.sample[3]), // David Kim
+        _TreeEmployee(Employee.sample[6]), // Grace Okafor
+      ],
+    ),
+    _TreeEmployee(
+      Employee.sample[1], // Bob Chen — Product Manager
+      [
+        _TreeEmployee(Employee.sample[8]), // Isabel Ferreira
+      ],
+    ),
+    _TreeEmployee(
+      Employee.sample[2], // Clara Dupont — Lead Designer
+      [
+        _TreeEmployee(Employee.sample[10]), // Karen Levi
+      ],
+    ),
+    _TreeEmployee(Employee.sample[5]), // Frank Müller — no reports
+    _TreeEmployee(Employee.sample[11]), // Luca Bianchi — no reports
+  ];
+
+  late final _controller = GridController<_TreeEmployee>(
+    options: GridOptions<_TreeEmployee>(
+      columns: [
+        ColumnDef<_TreeEmployee, String>.accessor(
+          id: 'name',
+          accessorFn: (e) => e.employee.name,
+          header: 'Name',
+        ),
+        ColumnDef<_TreeEmployee, String>.accessor(
+          id: 'role',
+          accessorFn: (e) => e.employee.role,
+          header: 'Role',
+        ),
+        ColumnDef<_TreeEmployee, String>.accessor(
+          id: 'department',
+          accessorFn: (e) => e.employee.department.name,
+          header: 'Department',
+        ),
+        ColumnDef<_TreeEmployee, double>.accessor(
+          id: 'salary',
+          accessorFn: (e) => e.employee.salary,
+          header: 'Salary',
+          columnType: ColumnType.money,
+          textAlignIndex: 1,
+        ),
+      ],
+      features: const [ExpandingFeature()],
+      getSubRows: (e) => e.reports,
+      getRowId: (e, i) => e.employee.id.toString(),
+    ),
+  )..setData(_treeData);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(12),
+          child: Wrap(
+            spacing: 8,
+            children: [
+              ActionChip(
+                label: const Text('Expand All'),
+                onPressed: () =>
+                    _controller.dispatch(const ToggleAllExpandedCommand(value: true)),
+              ),
+              ActionChip(
+                label: const Text('Collapse All'),
+                onPressed: () =>
+                    _controller.dispatch(const ToggleAllExpandedCommand(value: false)),
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          child: Text(
+            'Tap a row with reports to expand/collapse its sub-rows.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ),
+        Expanded(
+          child: FlutterGrid<_TreeEmployee>(
+            controller: _controller,
+            fillWidth: true,
+            showToolbar: false,
+            showFilterBar: false,
+            showPagination: false,
+            onRowTap: (row) {
+              if (row.subRows.isNotEmpty || row.depth > 0) {
+                _controller.dispatch(
+                  SetRowExpandedCommand(row.id, !row.isExpanded),
+                );
+              }
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Columns (visibility, ordering, sizing) ─────────────────────────────────
+
+class _ColumnsTab extends StatefulWidget {
+  const _ColumnsTab();
+
+  @override
+  State<_ColumnsTab> createState() => _ColumnsTabState();
+}
+
+class _ColumnsTabState extends State<_ColumnsTab> {
+  static const _colIds = ['name', 'role', 'department', 'salary', 'years'];
+
+  late final _controller = GridController<Employee>(
+    options: GridOptions(
+      columns: [
+        ColumnDef<Employee, String>.accessor(
+          id: 'name',
+          accessorFn: (e) => e.name,
+          header: 'Name',
+        ),
+        ColumnDef<Employee, String>.accessor(
+          id: 'role',
+          accessorFn: (e) => e.role,
+          header: 'Role',
+        ),
+        ColumnDef<Employee, String>.accessor(
+          id: 'department',
+          accessorFn: (e) => e.department.name,
+          header: 'Department',
+        ),
+        ColumnDef<Employee, double>.accessor(
+          id: 'salary',
+          accessorFn: (e) => e.salary,
+          header: 'Salary',
+          columnType: ColumnType.money,
+          textAlignIndex: 1,
+        ),
+        ColumnDef<Employee, int>.accessor(
+          id: 'years',
+          accessorFn: (e) => e.yearsAtCompany,
+          header: 'Years',
+          size: 80,
+          columnType: ColumnType.number,
+          textAlignIndex: 1,
+        ),
+      ],
+      features: [
+        ColumnVisibilityFeature(),
+        ColumnOrderingFeature(),
+        ColumnSizingFeature(),
+      ],
+    ),
+  )..setData(Employee.sample);
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(_onStateChanged);
+  }
+
+  void _onStateChanged() => setState(() {});
+
+  @override
+  void dispose() {
+    _controller.removeListener(_onStateChanged);
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final visibility = _controller.state.columnVisibility;
+    final order = _controller.state.columnOrder;
+    final sizing = _controller.state.columnSizing;
+    final displayOrder = order.isNotEmpty ? order : _colIds;
+
+    return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
+              child: Text('Visibility',
+                  style: Theme.of(context).textTheme.labelLarge),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Wrap(
+                spacing: 8,
+                children: _colIds.map((id) {
+                  final visible = visibility[id] ?? true;
+                  return FilterChip(
+                    label: Text(id),
+                    selected: visible,
+                    onSelected: (_) => _controller.dispatch(
+                      ToggleColumnVisibilityCommand(id),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
+              child: Text('Order',
+                  style: Theme.of(context).textTheme.labelLarge),
+            ),
+            SizedBox(
+              height: 56,
+              child: ReorderableListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                itemCount: displayOrder.length,
+                onReorder: (oldIndex, newIndex) {
+                  if (newIndex > oldIndex) newIndex--;
+                  final newOrder = List<String>.from(displayOrder);
+                  final item = newOrder.removeAt(oldIndex);
+                  newOrder.insert(newIndex, item);
+                  _controller.dispatch(SetColumnOrderCommand(newOrder));
+                },
+                itemBuilder: (context, i) {
+                  final id = displayOrder[i];
+                  return Padding(
+                    key: ValueKey(id),
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Chip(
+                      label: Text(id),
+                      avatar: const Icon(Icons.drag_handle, size: 16),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
+              child: Text('Sizing',
+                  style: Theme.of(context).textTheme.labelLarge),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Wrap(
+                spacing: 8,
+                children: [
+                  ActionChip(
+                    label: const Text('Name → 80'),
+                    onPressed: () => _controller.dispatch(
+                        const SetColumnSizeCommand('name', 80)),
+                  ),
+                  ActionChip(
+                    label: const Text('Name → 200'),
+                    onPressed: () => _controller.dispatch(
+                        const SetColumnSizeCommand('name', 200)),
+                  ),
+                  ActionChip(
+                    label: Text(
+                        'Reset sizing${sizing.isNotEmpty ? ' (${sizing.length} custom)' : ''}'),
+                    onPressed: () => _controller.dispatch(
+                        const ResetColumnSizingCommand()),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 16),
+            Expanded(
+              child: FlutterGrid<Employee>(
+                controller: _controller,
+                fillWidth: true,
+                showToolbar: false,
+                showFilterBar: false,
+                showPagination: false,
+              ),
+            ),
+          ],
+        );
   }
 }

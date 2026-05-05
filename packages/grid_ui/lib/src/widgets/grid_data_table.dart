@@ -78,12 +78,17 @@ class _GridDataTableState<T> extends State<GridDataTable<T>> {
     }
   }
 
-  // Compares IDs AND original references so that a sort (same IDs, different
-  // originals at each position) is not treated as "no change".
+  // Compares IDs, original references, AND row state flags so that selection,
+  // expansion, or pinning changes are not missed.
   bool _listsIdentical(List<RowModel<T>> a, List<RowModel<T>> b) {
     if (a.length != b.length) return false;
     for (int i = 0; i < a.length; i++) {
-      if (a[i].id != b[i].id || !identical(a[i].original, b[i].original)) {
+      if (a[i].id != b[i].id ||
+          !identical(a[i].original, b[i].original) ||
+          a[i].isSelected != b[i].isSelected ||
+          a[i].isExpanded != b[i].isExpanded ||
+          a[i].isPinnedTop != b[i].isPinnedTop ||
+          a[i].isPinnedBottom != b[i].isPinnedBottom) {
         return false;
       }
     }
@@ -114,6 +119,25 @@ class _GridDataTableState<T> extends State<GridDataTable<T>> {
         _rows.length == next.length &&
         Iterable.generate(_rows.length)
             .any((i) => !identical(_rows[i].original, next[i].original));
+
+    // Detect a state-only change: same rows, same originals, but isSelected /
+    // isExpanded / pinning changed — no AnimatedList key reset needed.
+    final stateChanged = !reordered &&
+        !contentChanged &&
+        removedCount == 0 &&
+        addedCount == 0 &&
+        _rows.length == next.length &&
+        Iterable.generate(_rows.length).any((i) =>
+            _rows[i].isSelected != next[i].isSelected ||
+            _rows[i].isExpanded != next[i].isExpanded ||
+            _rows[i].isPinnedTop != next[i].isPinnedTop ||
+            _rows[i].isPinnedBottom != next[i].isPinnedBottom);
+
+    if (stateChanged) {
+      // Refresh row models without resetting the list key (no structural change).
+      setState(() => _rows = List.from(next));
+      return;
+    }
 
     // Bulk reset for reorders, content changes, or many simultaneous changes.
     if (reordered || contentChanged || removedCount + addedCount > 5) {
