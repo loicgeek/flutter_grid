@@ -1,5 +1,10 @@
 # Exclude the demo app from the published package
 flutter_grid_example/
 
+./packages/grid_core/test_cache
+./packages/grid_flutter/test_cache
+./packages/grid_ui/test_cache
+
+
 # Local development overrides
 pubspec_overrides.yaml
