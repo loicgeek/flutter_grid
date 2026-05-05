@@ -1,0 +1,12 @@
+name: grid_export
+description: CSV export and clipboard utilities for flutter_grid
+version: 0.1.0
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+  flutter: '>=3.19.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  grid_core:
+    path: ../grid_core

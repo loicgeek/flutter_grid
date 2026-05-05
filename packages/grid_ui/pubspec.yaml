@@ -1,0 +1,19 @@
+name: grid_ui
+description: Pre-built UI components for flutter_grid
+version: 0.1.0
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+  flutter: '>=3.19.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  grid_core:
+    path: ../grid_core
+  grid_flutter:
+    path: ../grid_flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  lints: ^4.0.0

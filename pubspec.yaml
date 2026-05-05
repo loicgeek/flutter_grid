@@ -1,0 +1,16 @@
+name: flutter_grid
+description: Full-featured data table library for Flutter — TanStack Table-inspired
+version: 0.1.0
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+  flutter: '>=3.19.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  grid_core:
+    path: packages/grid_core
+  grid_flutter:
+    path: packages/grid_flutter
+  grid_ui:
+    path: packages/grid_ui

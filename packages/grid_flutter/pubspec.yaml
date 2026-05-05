@@ -1,0 +1,19 @@
+name: grid_flutter
+description: Flutter bindings for grid_core
+version: 0.1.0
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+  flutter: '>=3.19.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  grid_core:
+    path: ../grid_core
+  dio: ^5.4.0
+  shared_preferences: ^2.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  lints: ^4.0.0

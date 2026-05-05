@@ -1,0 +1,11 @@
+name: grid_core
+description: Pure Dart core for flutter_grid — headless table logic
+version: 0.1.0
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies: {}
+
+dev_dependencies:
+  test: ^1.25.0
+  lints: ^4.0.0
