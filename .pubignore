@@ -1,0 +1,5 @@
+# Exclude the demo app from the published package
+flutter_grid_example/
+
+# Local development overrides
+pubspec_overrides.yaml
