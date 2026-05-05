@@ -7,7 +7,7 @@ class ColumnInfo<T, V> {
   final bool isVisible;
   final bool isPinnedLeft;
   final bool isPinnedRight;
-  final double effectiveWidth;
+  final double? effectiveWidth;
   final int orderIndex;
 
   const ColumnInfo({
@@ -16,7 +16,7 @@ class ColumnInfo<T, V> {
     required this.isVisible,
     required this.isPinnedLeft,
     required this.isPinnedRight,
-    required this.effectiveWidth,
+    this.effectiveWidth,
     required this.orderIndex,
   });
 
@@ -51,7 +51,7 @@ class RowModel<T> {
   final List<RowModel<T>> subRows;
   final int depth;
   final RowModel<T>? parentRow;
-  
+
   final bool isGrouped;
   final bool isAggregated;
   final String? groupingColumnId;

@@ -115,6 +115,30 @@ class GridController<T> {
 
   // --- State reducer ---
 
+  Map<String, num> resolveColumnWidths(double availableWidth) {
+    final cols = _buildColumns();
+
+    double fixedWidth = 0;
+    int autoCount = 0;
+
+    for (final c in cols) {
+      final isAuto = c.def.size == null;
+
+      if (isAuto) {
+        autoCount++;
+      } else {
+        fixedWidth += c.def.size!;
+      }
+    }
+
+    final remaining = (availableWidth - fixedWidth).clamp(0, double.infinity);
+    final autoWidth = autoCount == 0 ? 0 : remaining / autoCount;
+
+    return {
+      for (final c in cols) c.id: c.def.size ?? autoWidth,
+    };
+  }
+
   GridState _reduce(GridState state, GridCommand command) {
     return switch (command) {
       // Sort
@@ -156,7 +180,8 @@ class GridController<T> {
       // Selection
       ToggleRowSelectionCommand c => _toggleRowSelection(state, c.rowId),
       ToggleAllRowsSelectedCommand c => _toggleAllRows(state, c.value),
-      ClearRowSelectionCommand _ => state.copyWith(rowSelection: {}, selectAllPages: false),
+      ClearRowSelectionCommand _ =>
+        state.copyWith(rowSelection: {}, selectAllPages: false),
       SelectAllPagesCommand c => state.copyWith(selectAllPages: c.value),
 
       // Row expand/pin
@@ -316,7 +341,7 @@ class GridController<T> {
         isVisible: visible,
         isPinnedLeft: _state.columnPinning.left.contains(col.id),
         isPinnedRight: _state.columnPinning.right.contains(col.id),
-        effectiveWidth: _state.columnSizing[col.id] ?? col.size ?? 150,
+        effectiveWidth: _state.columnSizing[col.id] ?? col.size,
         orderIndex: order.indexOf(col.id),
       );
     }).toList();

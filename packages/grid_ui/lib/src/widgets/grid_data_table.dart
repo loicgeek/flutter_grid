@@ -55,6 +55,7 @@ class _GridDataTableState<T> extends State<GridDataTable<T>> {
   late List<RowModel<T>> _rows;
 
   static const _animDuration = Duration(milliseconds: 250);
+  Map<String, num> columnWidths = {};
 
   @override
   void initState() {
@@ -130,7 +131,8 @@ class _GridDataTableState<T> extends State<GridDataTable<T>> {
         _rows.removeAt(i);
         _listKey.currentState?.removeItem(
           i,
-          (ctx, anim) => _buildRow(removed, i, animation: anim),
+          (ctx, anim) => _buildRow(removed, i,
+              animation: anim, columnWidths: columnWidths),
           duration: _animDuration,
         );
       }
@@ -152,12 +154,16 @@ class _GridDataTableState<T> extends State<GridDataTable<T>> {
   }
 
   Widget _buildRow(RowModel<T> row, int index,
-      {Animation<double>? animation, bool? isLastRow}) {
+      {Animation<double>? animation,
+      bool? isLastRow,
+      required Map<String, num> columnWidths}) {
     final theme = GridTheme.of(context);
     final visibleCols = widget.table.visibleColumns;
 
     Widget child = Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         GridDataRow<T>(
           row: row,
@@ -170,6 +176,7 @@ class _GridDataTableState<T> extends State<GridDataTable<T>> {
           onTap: widget.onRowTap,
           onDoubleTap: widget.onRowDoubleTap,
           onLongPress: widget.onRowLongPress,
+          columnWidths: columnWidths,
         ),
         if (widget.showColumnBorders && isLastRow == false)
           Divider(
@@ -195,20 +202,23 @@ class _GridDataTableState<T> extends State<GridDataTable<T>> {
     final theme = GridTheme.of(context);
     final visibleCols = widget.table.visibleColumns;
 
-    final totalWidth = visibleCols.fold<double>(
-      0,
-      (sum, col) => sum + col.effectiveWidth,
-    );
-
     return LayoutBuilder(
       builder: (context, constraints) {
-        final effectiveWidth = widget.fillWidth
-            ? math.max(totalWidth, constraints.maxWidth)
-            : totalWidth;
+        double availableWidth = constraints.maxWidth;
+
+        columnWidths = widget.controller.resolveColumnWidths(availableWidth);
 
         final headerHeight = widget.table.headerGroups.length *
                 GridTheme.of(context).headerHeight +
             5;
+        final totalWidth = columnWidths.values.fold<double>(
+          0,
+          (a, b) => a + b,
+        );
+
+        final effectiveWidth = widget.fillWidth
+            ? math.max(totalWidth, constraints.maxWidth)
+            : totalWidth;
 
         return ScrollConfiguration(
           behavior: NoBackGestureScrollBehavior(),
@@ -225,12 +235,15 @@ class _GridDataTableState<T> extends State<GridDataTable<T>> {
                       minHeight: headerHeight,
                       maxHeight: headerHeight,
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           ...widget.table.headerGroups
                               .map((group) => GridHeaderRow<T>(
                                     group: group,
                                     controller: widget.controller,
                                     visibleColumns: visibleCols,
+                                    columnWidths: columnWidths,
                                     scrollController: _horizontalController,
                                   )),
                           if (widget.showColumnBorders)
@@ -248,14 +261,17 @@ class _GridDataTableState<T> extends State<GridDataTable<T>> {
                       delegate: SliverChildBuilderDelegate(
                         (context, index) => _buildRow(
                             widget.table.topPinnedRows[index], index,
-                            isLastRow: widget.table.topPinnedRows.length - 1 == index),
+                            isLastRow:
+                                widget.table.topPinnedRows.length - 1 == index,
+                            columnWidths: columnWidths),
                         childCount: widget.table.topPinnedRows.length,
                       ),
                     ),
                   SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) => _buildRow(_rows[index], index,
-                          isLastRow: _rows.length - 1 == index),
+                          isLastRow: _rows.length - 1 == index,
+                          columnWidths: columnWidths),
                       childCount: _rows.length,
                     ),
                   ),
@@ -264,13 +280,17 @@ class _GridDataTableState<T> extends State<GridDataTable<T>> {
                       delegate: SliverChildBuilderDelegate(
                         (context, index) => _buildRow(
                             widget.table.bottomPinnedRows[index], index,
-                            isLastRow: widget.table.bottomPinnedRows.length - 1 == index),
+                            isLastRow:
+                                widget.table.bottomPinnedRows.length - 1 ==
+                                    index,
+                            columnWidths: columnWidths),
                         childCount: widget.table.bottomPinnedRows.length,
                       ),
                     ),
                   SliverToBoxAdapter(
                     child: widget.slots?.aggregationFooter != null
-                        ? widget.slots!.aggregationFooter!(context, widget.table)
+                        ? widget.slots!.aggregationFooter!(
+                            context, widget.table)
                         : const SizedBox.shrink(),
                   ),
                 ],

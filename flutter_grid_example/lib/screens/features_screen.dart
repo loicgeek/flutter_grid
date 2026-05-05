@@ -37,12 +37,9 @@ class _FeaturesScreenState extends State<FeaturesScreen>
         ),
       ),
       body: TabBarView(
+        physics: NeverScrollableScrollPhysics(),
         controller: _tabController,
-        children: const [
-          _PinningTab(),
-          _CustomCellsTab(),
-          _ThemingTab(),
-        ],
+        children: const [_PinningTab(), _CustomCellsTab(), _ThemingTab()],
       ),
     );
   }
@@ -65,27 +62,27 @@ class _PinningTabState extends State<_PinningTab> {
           id: 'name',
           accessorFn: (e) => e.name,
           header: 'Name',
-          size: 180,
+          // size: 180,
           enablePinning: true,
         ),
         ColumnDef<Employee, String>.accessor(
           id: 'role',
           accessorFn: (e) => e.role,
           header: 'Role',
-          size: 160,
+          // size: 160,
           enablePinning: true,
         ),
         ColumnDef<Employee, String>.accessor(
           id: 'department',
           accessorFn: (e) => e.department.name,
           header: 'Department',
-          size: 140,
+          // size: 140,
         ),
         ColumnDef<Employee, double>.accessor(
           id: 'salary',
           accessorFn: (e) => e.salary,
           header: 'Salary',
-          size: 120,
+          // size: 120,
           columnType: ColumnType.money,
           textAlignIndex: 1,
         ),
@@ -176,17 +173,17 @@ class _CustomCellsTabState extends State<_CustomCellsTab> {
           id: 'name',
           accessorFn: (e) => e.name,
           header: 'Employee',
-          size: 200,
+          // size: 200,
           cell: (ctx) {
-            final emp =
-                (ctx as CellContext).cell.row.original as Employee;
+            final emp = (ctx as CellContext).cell.row.original as Employee;
             return Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 CircleAvatar(
                   radius: 14,
-                  backgroundColor:
-                      _deptColor(emp.department).withValues(alpha: 0.2),
+                  backgroundColor: _deptColor(
+                    emp.department,
+                  ).withValues(alpha: 0.2),
                   child: Text(
                     emp.name[0],
                     style: TextStyle(
@@ -202,12 +199,16 @@ class _CustomCellsTabState extends State<_CustomCellsTab> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(emp.name,
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                          overflow: TextOverflow.ellipsis),
-                      Text(emp.email,
-                          style: const TextStyle(fontSize: 11),
-                          overflow: TextOverflow.ellipsis),
+                      Text(
+                        emp.name,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        emp.email,
+                        style: const TextStyle(fontSize: 11),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ],
                   ),
                 ),
@@ -219,13 +220,11 @@ class _CustomCellsTabState extends State<_CustomCellsTab> {
           id: 'dept',
           accessorFn: (e) => e.department.name,
           header: 'Department',
-          size: 130,
+          // size: 130,
           cell: (ctx) {
-            final emp =
-                (ctx as CellContext).cell.row.original as Employee;
+            final emp = (ctx as CellContext).cell.row.original as Employee;
             return Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
                 color: _deptColor(emp.department).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(12),
@@ -245,14 +244,14 @@ class _CustomCellsTabState extends State<_CustomCellsTab> {
           id: 'perf',
           accessorFn: (e) => e.performance,
           header: 'Performance',
-          size: 150,
+          // size: 150,
           cell: (ctx) {
             final value = (ctx as CellContext).cell.value as double? ?? 0.0;
             final color = value >= 0.9
                 ? Colors.green
                 : value >= 0.7
-                    ? Colors.orange
-                    : Colors.red;
+                ? Colors.orange
+                : Colors.red;
             return Row(
               children: [
                 Expanded(
@@ -267,11 +266,14 @@ class _CustomCellsTabState extends State<_CustomCellsTab> {
                   ),
                 ),
                 const SizedBox(width: 6),
-                Text('${(value * 100).round()}%',
-                    style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: color)),
+                Text(
+                  '${(value * 100).round()}%',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: color,
+                  ),
+                ),
               ],
             );
           },
@@ -280,13 +282,15 @@ class _CustomCellsTabState extends State<_CustomCellsTab> {
           id: 'active',
           accessorFn: (e) => e.isActive,
           header: 'Status',
-          size: 90,
+          // size: 90,
           textAlignIndex: 2,
           cell: (ctx) {
             final active = (ctx as CellContext).cell.value as bool? ?? false;
             return Chip(
-              label: Text(active ? 'Active' : 'Inactive',
-                  style: const TextStyle(fontSize: 11)),
+              label: Text(
+                active ? 'Active' : 'Inactive',
+                style: const TextStyle(fontSize: 11),
+              ),
               backgroundColor: active
                   ? Colors.green.withValues(alpha: 0.15)
                   : Colors.grey.withValues(alpha: 0.15),
@@ -301,13 +305,13 @@ class _CustomCellsTabState extends State<_CustomCellsTab> {
   )..setData(Employee.sample);
 
   Color _deptColor(Department d) => switch (d) {
-        Department.engineering => Colors.blue,
-        Department.product => Colors.purple,
-        Department.design => Colors.pink,
-        Department.marketing => Colors.orange,
-        Department.sales => Colors.green,
-        Department.support => Colors.teal,
-      };
+    Department.engineering => Colors.blue,
+    Department.product => Colors.purple,
+    Department.design => Colors.pink,
+    Department.marketing => Colors.orange,
+    Department.sales => Colors.green,
+    Department.support => Colors.teal,
+  };
 
   @override
   void dispose() {
@@ -329,13 +333,13 @@ class _CustomCellsTabState extends State<_CustomCellsTab> {
 }
 
 Color _deptColor(Department d) => switch (d) {
-      Department.engineering => Colors.blue,
-      Department.product => Colors.purple,
-      Department.design => Colors.pink,
-      Department.marketing => Colors.orange,
-      Department.sales => Colors.green,
-      Department.support => Colors.teal,
-    };
+  Department.engineering => Colors.blue,
+  Department.product => Colors.purple,
+  Department.design => Colors.pink,
+  Department.marketing => Colors.orange,
+  Department.sales => Colors.green,
+  Department.support => Colors.teal,
+};
 
 // ── Theming ────────────────────────────────────────────────────────────────
 
@@ -354,13 +358,13 @@ class _ThemingTabState extends State<_ThemingTab> {
           id: 'name',
           accessorFn: (e) => e.name,
           header: 'Name',
-          size: 180,
+          // size: 180,
         ),
         ColumnDef<Employee, String>.accessor(
           id: 'role',
           accessorFn: (e) => e.role,
           header: 'Role',
-          size: 160,
+          // size: 160,
         ),
         ColumnDef<Employee, double>.accessor(
           id: 'salary',
@@ -396,16 +400,13 @@ class _ThemingTabState extends State<_ThemingTab> {
           fontWeight: FontWeight.w700,
           fontSize: 13,
         ),
-        cellTextStyle: const TextStyle(
-          color: Color(0xFFCDD6F4),
-          fontSize: 13,
-        ),
+        cellTextStyle: const TextStyle(color: Color(0xFFCDD6F4), fontSize: 13),
         rowHeight: 48,
         headerHeight: 44,
       ),
       child: FlutterGrid<Employee>(
         controller: _controller,
-        fillWidth: true,
+        fillWidth: false,
         showToolbar: false,
         showFilterBar: false,
         showPagination: false,

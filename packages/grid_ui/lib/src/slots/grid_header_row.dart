@@ -13,12 +13,15 @@ class GridHeaderRow<T> extends StatelessWidget {
   /// Visible columns in display order, used to compute widths for span headers.
   final List<ColumnInfo<T, Object?>> visibleColumns;
 
+  final Map<String, num>? columnWidths;
+
   const GridHeaderRow({
     super.key,
     required this.group,
     required this.controller,
     required this.visibleColumns,
     this.scrollController,
+    this.columnWidths,
   });
 
   @override
@@ -31,7 +34,8 @@ class GridHeaderRow<T> extends StatelessWidget {
     double currentOffset = 0;
     for (int i = 0; i < visibleColumns.length; i++) {
       leftOffsets[i] = currentOffset;
-      currentOffset += visibleColumns[i].effectiveWidth;
+      currentOffset +=
+          columnWidths?[visibleColumns[i].id] ?? theme.defaultColumnWidth;
     }
     final totalWidth = currentOffset;
 
@@ -45,8 +49,7 @@ class GridHeaderRow<T> extends StatelessWidget {
         final sorting = controller.state.sorting;
         final sortEntry =
             sorting.where((s) => s.columnId == col.id).firstOrNull;
-        final sortIndex =
-            sortEntry == null ? null : sorting.indexOf(sortEntry);
+        final sortIndex = sortEntry == null ? null : sorting.indexOf(sortEntry);
 
         String sortLabel = '';
         if (sortEntry != null) {
@@ -65,24 +68,27 @@ class GridHeaderRow<T> extends StatelessWidget {
           headerContent = col.def.headerWidget!(hCtx) as Widget;
         } else {
           headerContent = Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               if (col.def.headerIcon != null) ...[
                 col.def.headerIcon as Widget,
                 const SizedBox(width: 4),
               ],
-              Expanded(
+              Flexible(
                 child: Text(
                   col.def.header ?? col.id,
                   style: theme.headerTextStyle,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              if (col.def.enableSorting)
+              if (col.def.enableSorting) ...[
+                const SizedBox(width: 4),
                 GridSortIndicator(
                   isAscending: sortEntry != null && !sortEntry.descending,
                   isDescending: sortEntry != null && sortEntry.descending,
                   sortIndex: sortIndex,
                 ),
+              ],
             ],
           );
         }
@@ -95,7 +101,10 @@ class GridHeaderRow<T> extends StatelessWidget {
                 ? () => controller.toggleSort(col.id)
                 : null,
             child: SizedBox(
-              width: col.effectiveWidth,
+              width: (columnWidths?[col.id] ??
+                      col.effectiveWidth ??
+                      theme.defaultColumnWidth)
+                  .toDouble(),
               height: theme.headerHeight,
               child: Padding(
                 padding: theme.headerPadding,
@@ -117,9 +126,8 @@ class GridHeaderRow<T> extends StatelessWidget {
             animation: scrollController!,
             builder: (context, child) {
               double offset = leftOffsets[i]!;
-              final scrollOffset = scrollController!.hasClients
-                  ? scrollController!.offset
-                  : 0.0;
+              final scrollOffset =
+                  scrollController!.hasClients ? scrollController!.offset : 0.0;
 
               BoxShadow? shadow;
               if (col.isPinnedLeft) {
@@ -170,7 +178,8 @@ class GridHeaderRow<T> extends StatelessWidget {
         final end =
             (visibleCursor + header.colSpan).clamp(0, visibleColumns.length);
         for (int i = visibleCursor; i < end; i++) {
-          width += visibleColumns[i].effectiveWidth;
+          width +=
+              columnWidths?[visibleColumns[i].id] ?? theme.defaultColumnWidth;
         }
         visibleCursor = end;
 

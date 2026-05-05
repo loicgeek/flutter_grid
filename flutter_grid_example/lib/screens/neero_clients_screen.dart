@@ -52,8 +52,12 @@ class _NeeroClientsScreenState extends State<NeeroClientsScreen> {
   void initState() {
     super.initState();
     _controller = GridController<Client>(
-      options: GridOptions(columns: _buildColumns()),
+      options: GridOptions(
+        columns: _buildColumns(),
+        features: [ColumnPinningFeature(), SelectionFeature()],
+      ),
     );
+    // _controller.pinColumn('actions', ColumnPinPosition.right);
     _controller.setData(_pageData);
     _searchCtrl.addListener(_onFilterChanged);
     _personIdCtrl.addListener(_onFilterChanged);
@@ -138,7 +142,7 @@ class _NeeroClientsScreenState extends State<NeeroClientsScreen> {
       id: 'personId',
       accessorFn: (c) => c.personId,
       header: 'PERSON ID',
-      size: 148,
+      // size: 148,
       enableSorting: false,
       cell: (ctx) => Text(
         _client(ctx).personId,
@@ -153,7 +157,7 @@ class _NeeroClientsScreenState extends State<NeeroClientsScreen> {
       id: 'phone',
       accessorFn: (c) => c.phone,
       header: 'TÉLÉPHONE',
-      size: 160,
+      // size: 160,
       enableSorting: false,
       cell: (ctx) => SelectableText(
         _client(ctx).phone,
@@ -169,7 +173,7 @@ class _NeeroClientsScreenState extends State<NeeroClientsScreen> {
       id: 'email',
       accessorFn: (c) => c.email,
       header: 'EMAIL',
-      size: 220,
+      // size: 220,
       enableSorting: false,
       cell: (ctx) => SelectableText(
         _client(ctx).email,
@@ -181,7 +185,7 @@ class _NeeroClientsScreenState extends State<NeeroClientsScreen> {
       id: 'lastName',
       accessorFn: (c) => c.lastName,
       header: 'NOM',
-      size: 130,
+      // size: 130,
       cell: (ctx) => SelectableText(
         _client(ctx).lastName.toUpperCase(),
         style: const TextStyle(
@@ -196,7 +200,7 @@ class _NeeroClientsScreenState extends State<NeeroClientsScreen> {
       id: 'firstName',
       accessorFn: (c) => c.firstName,
       header: 'PRÉNOM',
-      size: 120,
+      // size: 120,
       enableSorting: false,
       cell: (ctx) => SelectableText(
         _client(ctx).firstName,
@@ -208,7 +212,7 @@ class _NeeroClientsScreenState extends State<NeeroClientsScreen> {
       id: 'status',
       accessorFn: (c) => c.isActive,
       header: 'STATUT',
-      size: 112,
+      // size: 112,
       enableSorting: false,
       cell: (ctx) => _StatusBadge(active: _client(ctx).isActive),
     ),
@@ -216,7 +220,7 @@ class _NeeroClientsScreenState extends State<NeeroClientsScreen> {
       id: 'plan',
       accessorFn: (c) => c.plan.name,
       header: 'PLAN',
-      size: 108,
+      // size: 108,
       enableSorting: false,
       cell: (ctx) => _PlanBadge(plan: _client(ctx).plan),
     ),
@@ -224,15 +228,17 @@ class _NeeroClientsScreenState extends State<NeeroClientsScreen> {
       id: 'lastLogin',
       accessorFn: (c) => c.lastLogin,
       header: 'DERNIÈRE CONNEXION',
-      size: 172,
+      // size: 172,
       enableSorting: false,
       cell: (ctx) => _LastLoginCell(dateTime: _client(ctx).lastLogin),
     ),
     ColumnDef<Client, String>.display(
-      id: 'col_1',
+      id: 'actions',
       header: '',
-      size: 172,
+      // size: 172,
       // textAlignIndex: 2,
+      enablePinning: true,
+
       cell: (ctx) => _ActionButton(client: _client(ctx)),
     ),
   ];

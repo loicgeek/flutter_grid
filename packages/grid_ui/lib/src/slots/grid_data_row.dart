@@ -13,6 +13,7 @@ class GridDataRow<T> extends StatefulWidget {
   final bool isStriped;
   final double? rowHeight;
   final ScrollController? scrollController;
+  final Map<String, num>? columnWidths;
 
   /// Fire [HapticFeedback.lightImpact] when this row transitions to selected.
   final bool enableHapticFeedback;
@@ -29,6 +30,7 @@ class GridDataRow<T> extends StatefulWidget {
     this.isStriped = false,
     this.rowHeight,
     this.scrollController,
+    this.columnWidths,
     this.enableHapticFeedback = false,
     this.onTap,
     this.onDoubleTap,
@@ -71,9 +73,12 @@ class _GridDataRowState<T> extends State<GridDataRow<T>> {
     // Calculate left offsets
     final leftOffsets = <int, double>{};
     double currentOffset = 0;
+
     for (int i = 0; i < widget.visibleColumns.length; i++) {
       leftOffsets[i] = currentOffset;
-      currentOffset += widget.visibleColumns[i].effectiveWidth;
+      currentOffset += widget.columnWidths?[widget.visibleColumns[i].id] ??
+          widget.visibleColumns[i].effectiveWidth ??
+          theme.defaultColumnWidth;
     }
     final totalWidth = currentOffset;
 
@@ -126,7 +131,10 @@ class _GridDataRowState<T> extends State<GridDataRow<T>> {
                 Widget content = Semantics(
                   label: '${col.def.header ?? col.id}: ${cell.value}',
                   child: SizedBox(
-                    width: col.effectiveWidth,
+                    width: (widget.columnWidths?[col.id] ??
+                            col.effectiveWidth ??
+                            theme.defaultColumnWidth)
+                        .toDouble(),
                     height: widget.rowHeight ?? theme.rowHeight,
                     child: Align(
                       alignment: textAlign == TextAlign.right

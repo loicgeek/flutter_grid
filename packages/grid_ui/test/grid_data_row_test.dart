@@ -40,9 +40,8 @@ GridController<_Person> _makeController() {
 Widget _wrap(Widget child, {GridThemeData? themeData}) {
   return MaterialApp(
     home: Scaffold(
-      body: themeData != null
-          ? GridTheme(data: themeData, child: child)
-          : child,
+      body:
+          themeData != null ? GridTheme(data: themeData, child: child) : child,
     ),
   );
 }
@@ -65,6 +64,7 @@ void main() {
           row: row,
           visibleColumns: visibleCols,
           controller: controller,
+          columnWidths: {},
         ),
       ));
 
@@ -141,7 +141,8 @@ void main() {
       );
     });
 
-    testWidgets('switches to hoverRowBackground on mouse enter', (tester) async {
+    testWidgets('switches to hoverRowBackground on mouse enter',
+        (tester) async {
       const hoverColor = Color(0xFF00FF00);
       const normalColor = Color(0xFFFFFFFF);
 
@@ -159,14 +160,12 @@ void main() {
 
       // Before hover — normal background
       expect(
-        find.byWidgetPredicate(
-            (w) => w is Container && w.color == normalColor),
+        find.byWidgetPredicate((w) => w is Container && w.color == normalColor),
         findsOneWidget,
       );
 
       // Simulate mouse hover
-      final gesture =
-          await tester.createGesture(kind: PointerDeviceKind.mouse);
+      final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.addPointer(
         location: tester.getCenter(find.byType(GridDataRow<_Person>)),
       );
@@ -175,8 +174,7 @@ void main() {
 
       // After hover — hover background
       expect(
-        find.byWidgetPredicate(
-            (w) => w is Container && w.color == hoverColor),
+        find.byWidgetPredicate((w) => w is Container && w.color == hoverColor),
         findsOneWidget,
       );
     });
@@ -197,8 +195,7 @@ void main() {
         ),
       ));
 
-      final gesture =
-          await tester.createGesture(kind: PointerDeviceKind.mouse);
+      final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.addPointer(
         location: tester.getCenter(find.byType(GridDataRow<_Person>)),
       );
@@ -210,13 +207,13 @@ void main() {
       await tester.pump();
 
       expect(
-        find.byWidgetPredicate(
-            (w) => w is Container && w.color == normalColor),
+        find.byWidgetPredicate((w) => w is Container && w.color == normalColor),
         findsOneWidget,
       );
     });
 
-    testWidgets('hover ignored when hoverRowBackground is null', (tester) async {
+    testWidgets('hover ignored when hoverRowBackground is null',
+        (tester) async {
       const normalColor = Color(0xFFFFFFFF);
 
       await tester.pumpWidget(_wrap(
@@ -231,8 +228,7 @@ void main() {
         ),
       ));
 
-      final gesture =
-          await tester.createGesture(kind: PointerDeviceKind.mouse);
+      final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.addPointer(
         location: tester.getCenter(find.byType(GridDataRow<_Person>)),
       );
@@ -241,8 +237,7 @@ void main() {
 
       // Background unchanged
       expect(
-        find.byWidgetPredicate(
-            (w) => w is Container && w.color == normalColor),
+        find.byWidgetPredicate((w) => w is Container && w.color == normalColor),
         findsOneWidget,
       );
     });

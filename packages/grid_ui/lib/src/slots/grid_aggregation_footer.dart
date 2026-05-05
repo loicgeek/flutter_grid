@@ -6,7 +6,13 @@ import '../theme/grid_theme.dart';
 class GridAggregationFooter<T> extends StatelessWidget {
   final GridTableState<T> table;
 
-  const GridAggregationFooter({super.key, required this.table});
+  final Map<String, num>? columnWidths;
+
+  const GridAggregationFooter({
+    super.key,
+    required this.table,
+    this.columnWidths,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +26,10 @@ class GridAggregationFooter<T> extends StatelessWidget {
     double currentOffset = 0;
     for (int i = 0; i < visibleCols.length; i++) {
       leftOffsets[i] = currentOffset;
-      currentOffset += visibleCols[i].effectiveWidth;
+      currentOffset += (columnWidths?[visibleCols[i].id] ??
+              visibleCols[i].effectiveWidth ??
+              theme.defaultColumnWidth)
+          .toDouble();
     }
     final totalWidth = currentOffset;
 
@@ -31,7 +40,7 @@ class GridAggregationFooter<T> extends StatelessWidget {
       Widget content;
       if (col.def.aggregationFn != null) {
         final aggregatedValue = col.def.aggregationFn!(leafRows, const []);
-        
+
         // Use aggregatedCell if provided
         if (col.def.aggregatedCell != null) {
           // Pass a context map since we don't have a CellModel
@@ -52,7 +61,10 @@ class GridAggregationFooter<T> extends StatelessWidget {
       if (col.def.textAlignIndex == 2) textAlign = TextAlign.center;
 
       content = SizedBox(
-        width: col.effectiveWidth,
+        width: (columnWidths?[col.id] ??
+                col.effectiveWidth ??
+                theme.defaultColumnWidth)
+            .toDouble(),
         height: theme.rowHeight,
         child: Align(
           alignment: textAlign == TextAlign.right
