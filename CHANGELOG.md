@@ -1,6 +1,11 @@
 # Changelog
 
-All notable changes to `flutter_grid` are documented here.
+All notable changes to `ntech_grid` are documented here.
+## 0.1.2 - 2026-05-04
+ 
+### Added
+ - Added `skrinkwrap` parameter to grid
+
 
 ## 0.2.0 — 2026-05-04
 
