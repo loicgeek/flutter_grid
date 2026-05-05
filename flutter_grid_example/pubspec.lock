@@ -155,10 +155,9 @@ packages:
   grid_core:
     dependency: transitive
     description:
-      name: grid_core
-      sha256: cc3f06f2c159fbb0a1806f60e5fed2de7609ebb6e22f74cbe28eecc19e0acf81
-      url: "https://pub.dev"
-    source: hosted
+      path: "../packages/grid_core"
+      relative: true
+    source: path
     version: "0.1.0"
   grid_export:
     dependency: "direct main"
@@ -170,18 +169,16 @@ packages:
   grid_flutter:
     dependency: transitive
     description:
-      name: grid_flutter
-      sha256: "442fed0016efe4a602358e7dc04b66a539cb3c62e70219095cc8130fbd277216"
-      url: "https://pub.dev"
-    source: hosted
+      path: "../packages/grid_flutter"
+      relative: true
+    source: path
     version: "0.1.0"
   grid_ui:
     dependency: transitive
     description:
-      name: grid_ui
-      sha256: "69a7b4132e4d866b8377ba9d65d1c7f715ea84b1d738f7f61b9f5089d4a76cfd"
-      url: "https://pub.dev"
-    source: hosted
+      path: "../packages/grid_ui"
+      relative: true
+    source: path
     version: "0.1.0"
   hooks:
     dependency: transitive

@@ -21,7 +21,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  grid_core: ^0.1.0
+  grid_core:
+    path: ../grid_core
   dio: ^5.4.0
   shared_preferences: ^2.2.0
 

@@ -22,8 +22,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  grid_core: ^0.1.0
-  grid_flutter: ^0.1.0
+  grid_core:
+    path: ../grid_core
+  grid_flutter:
+    path: ../grid_flutter
 
 dev_dependencies:
   flutter_test:
