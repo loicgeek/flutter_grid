@@ -25,11 +25,12 @@ Sorting, filtering, pagination, grouping, selection, pinning, editing — all co
 16. [Custom theme](#custom-theme)
 17. [Slots — customise any UI section](#slots--customise-any-ui-section)
 18. [Low-level: GridBuilder](#low-level-gridbuildert)
-19. [Mobile layout](#mobile-layout)
-20. [CSV export](#csv-export-grid_export)
-21. [Middleware](#middleware)
-22. [FlutterGrid parameter reference](#fluttergrid-parameter-reference)
-23. [GridController API reference](#gridcontroller-api-reference)
+19. [Embedded / shrink-wrap mode](#embedded--shrink-wrap-mode)
+20. [Mobile layout](#mobile-layout)
+21. [CSV export](#csv-export-grid_export)
+22. [Middleware](#middleware)
+23. [FlutterGrid parameter reference](#fluttergrid-parameter-reference)
+24. [GridController API reference](#gridcontroller-api-reference)
 
 ---
 
@@ -958,6 +959,42 @@ GridBuilder<Person>(
 
 ---
 
+## Embedded / shrink-wrap mode
+
+By default `FlutterGrid` expands to fill all available vertical space and manages its own internal scroll view. Set `shrinkWrap: true` to make the grid size itself to its content height instead, so it can be safely placed inside a parent scrollable (`ListView`, `SingleChildScrollView`, `CustomScrollView`, etc.).
+
+```dart
+SingleChildScrollView(
+  child: Column(
+    children: [
+      const Text('Active employees', style: TextStyle(fontWeight: FontWeight.bold)),
+      FlutterGrid<Employee>(
+        controller: _activeController,
+        shrinkWrap: true,      // ← sizes to content
+        fillWidth: true,
+        showToolbar: false,
+        showPagination: false,
+      ),
+
+      const SizedBox(height: 24),
+
+      const Text('Inactive employees', style: TextStyle(fontWeight: FontWeight.bold)),
+      FlutterGrid<Employee>(
+        controller: _inactiveController,
+        shrinkWrap: true,
+        fillWidth: true,
+        showToolbar: false,
+        showPagination: false,
+      ),
+    ],
+  ),
+)
+```
+
+> **Note** — when `shrinkWrap` is `true` the sticky header is disabled and the internal scroll physics are set to `NeverScrollableScrollPhysics`. The parent scroll view controls the viewport.
+
+---
+
 ## Mobile layout
 
 `FlutterGrid` falls back to a custom `rowBuilder` when the screen width is below `breakpoint` (default `600`):
@@ -1065,6 +1102,7 @@ controller.executeOptimistic(
 | `showColumnBorders` | `bool` | `false` | Vertical column dividers |
 | `striped` | `bool` | `true` | Alternate row background |
 | `fillWidth` | `bool` | `false` | Expand table to fill width |
+| `shrinkWrap` | `bool` | `false` | Size to content height for embedding in a parent scrollable |
 | `enableHapticFeedback` | `bool` | `false` | `HapticFeedback.lightImpact()` on selection |
 | `rowHeight` | `double?` | theme `52.0` | Override row height |
 | `breakpoint` | `double` | `600` | Width below which `rowBuilder` is used |

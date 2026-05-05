@@ -43,6 +43,14 @@ class FlutterGrid<T> extends StatefulWidget {
   /// When true the table expands to fill available horizontal space.
   final bool fillWidth;
 
+  /// When true the grid sizes itself to its content height so it can be
+  /// embedded inside a parent scrollable (e.g. [ListView],
+  /// [SingleChildScrollView], [CustomScrollView]).
+  ///
+  /// The sticky header and internal vertical scroll are disabled; the parent
+  /// scroll view controls the viewport.
+  final bool shrinkWrap;
+
   /// When true fires [HapticFeedback.lightImpact] when a row becomes selected.
   final bool enableHapticFeedback;
 
@@ -66,6 +74,7 @@ class FlutterGrid<T> extends StatefulWidget {
     this.showColumnBorders = false,
     this.striped = true,
     this.fillWidth = false,
+    this.shrinkWrap = false,
     this.enableHapticFeedback = false,
     this.rowHeight,
     this.breakpoint = 600,
@@ -112,10 +121,13 @@ class _FlutterGridState<T> extends State<FlutterGrid<T>> {
               );
         }
 
+        final body = _buildBody(context, table);
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
-          mainAxisSize: MainAxisSize.max,
+          mainAxisSize:
+              widget.shrinkWrap ? MainAxisSize.min : MainAxisSize.max,
           children: [
             // Toolbar
             if (widget.showToolbar)
@@ -133,8 +145,9 @@ class _FlutterGridState<T> extends State<FlutterGrid<T>> {
               table: table,
             ),
 
-            // Body
-            Expanded(child: _buildBody(context, table)),
+            // Body — expanded when the grid owns its scroll, intrinsic when
+            // embedded in a parent scrollable.
+            if (widget.shrinkWrap) body else Expanded(child: body),
 
             // Pagination
             if (widget.showPagination)
@@ -199,6 +212,7 @@ class _FlutterGridState<T> extends State<FlutterGrid<T>> {
       showColumnBorders: widget.showColumnBorders,
       striped: widget.striped,
       fillWidth: widget.fillWidth,
+      shrinkWrap: widget.shrinkWrap,
       enableHapticFeedback: widget.enableHapticFeedback,
       rowHeight: widget.rowHeight,
       onRowTap: widget.onRowTap,

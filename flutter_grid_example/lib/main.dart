@@ -7,6 +7,7 @@ import 'screens/features_screen.dart';
 import 'screens/neero_clients_screen.dart';
 import 'screens/selection_screen.dart';
 import 'screens/simple_screen.dart';
+import 'screens/shrink_wrap_screen.dart';
 import 'screens/todos_screen.dart';
 
 void main() {
@@ -63,6 +64,10 @@ class _ShellState extends State<_Shell> {
       icon: Icon(Icons.checklist_rounded),
       label: 'Todos',
     ),
+    NavigationDestination(
+      icon: Icon(Icons.unfold_more),
+      label: 'Shrink',
+    ),
   ];
 
   static const _screens = [
@@ -73,6 +78,7 @@ class _ShellState extends State<_Shell> {
     FeaturesScreen(),
     NeeroClientsScreen(),
     TodosScreen(),
+    ShrinkWrapScreen(),
   ];
 
   @override

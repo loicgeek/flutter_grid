@@ -19,6 +19,15 @@ class GridDataTable<T> extends StatefulWidget {
   /// When true the table expands to fill available horizontal space.
   final bool fillWidth;
 
+  /// When true the table sizes itself to its content height instead of
+  /// expanding to fill the available space. Use this when embedding the grid
+  /// inside a parent scrollable (e.g. [ListView], [SingleChildScrollView]).
+  ///
+  /// When [shrinkWrap] is true the sticky header is disabled (the parent
+  /// scroll view controls the viewport) and the vertical scroll physics are
+  /// set to [NeverScrollableScrollPhysics].
+  final bool shrinkWrap;
+
   final bool enableHapticFeedback;
   final double? rowHeight;
   final void Function(RowModel<T>)? onRowTap;
@@ -33,6 +42,7 @@ class GridDataTable<T> extends StatefulWidget {
     this.showColumnBorders = false,
     this.striped = true,
     this.fillWidth = false,
+    this.shrinkWrap = false,
     this.enableHapticFeedback = false,
     this.rowHeight,
     this.onRowTap,
@@ -252,9 +262,15 @@ class _GridDataTableState<T> extends State<GridDataTable<T>> {
             child: SizedBox(
               width: effectiveWidth,
               child: CustomScrollView(
+                shrinkWrap: widget.shrinkWrap,
+                physics: widget.shrinkWrap
+                    ? const NeverScrollableScrollPhysics()
+                    : null,
                 slivers: [
                   SliverPersistentHeader(
-                    pinned: theme.pinnedHeader!,
+                    // Pinning requires the grid to own the viewport; disable
+                    // when the parent scroll view owns it instead.
+                    pinned: widget.shrinkWrap ? false : (theme.pinnedHeader!),
                     delegate: _HeaderDelegate(
                       minHeight: headerHeight,
                       maxHeight: headerHeight,
