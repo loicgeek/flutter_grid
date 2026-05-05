@@ -1014,3 +1014,171 @@ class _NavBtn extends StatelessWidget {
     );
   }
 }
+
+
+
+// class _Pagination extends StatelessWidget {
+//   final int totalItems;
+//   final int currentPage;
+//   final int pageSize;
+//   final void Function(int) onPageChanged;
+//   final void Function(int) onPageSizeChanged;
+
+//   const _Pagination({
+//     required this.totalItems,
+//     required this.currentPage,
+//     required this.pageSize,
+//     required this.onPageChanged,
+//     required this.onPageSizeChanged,
+//   });
+
+//   int get _totalPages =>
+//       totalItems == 0 ? 1 : ((totalItems + pageSize - 1) ~/ pageSize);
+
+//   int get _from => totalItems == 0 ? 0 : (currentPage - 1) * pageSize + 1;
+//   int get _to => (currentPage * pageSize).clamp(0, totalItems);
+
+//   List<Object> _pageNumbers() {
+//     final total = _totalPages;
+//     if (total <= 7) return List.generate(total, (i) => i + 1);
+
+//     final result = <Object>[];
+//     result.add(1);
+//     if (currentPage > 3) result.add('…');
+
+//     final start = (currentPage - 1).clamp(2, total - 1);
+//     final end = (currentPage + 1).clamp(2, total - 1);
+//     for (int i = start; i <= end; i++) {
+//       result.add(i);
+//     }
+
+//     if (currentPage < total - 2) result.add('…');
+//     result.add(total);
+
+//     return result;
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Row(
+//       children: [
+//         // Page size selector
+//         Container(
+//           height: 34,
+//           padding: const EdgeInsets.symmetric(horizontal: 10),
+//           decoration: BoxDecoration(
+//             color: _white,
+//             border: Border.all(color: _borderColor),
+//             borderRadius: BorderRadius.circular(7),
+//           ),
+//           child: DropdownButtonHideUnderline(
+//             child: DropdownButton<int>(
+//               value: pageSize,
+//               isDense: true,
+//               style: const TextStyle(fontSize: 13, color: _textSecondary),
+//               items: [10, 25, 50]
+//                   .map(
+//                     (n) => DropdownMenuItem(value: n, child: Text('$n / page')),
+//                   )
+//                   .toList(),
+//               onChanged: (v) => v != null ? onPageSizeChanged(v) : null,
+//             ),
+//           ),
+//         ),
+//         const SizedBox(width: 12),
+//         Text(
+//           '$_from–$_to sur $totalItems',
+//           style: const TextStyle(fontSize: 13, color: _textSecondary),
+//         ),
+//         const Spacer(),
+//         // Prev button
+//         _NavBtn(
+//           icon: Icons.chevron_left_rounded,
+//           enabled: currentPage > 1,
+//           onTap: () => onPageChanged(currentPage - 1),
+//         ),
+//         const SizedBox(width: 4),
+//         // Page number chips
+//         ..._pageNumbers().map((item) {
+//           if (item is String) {
+//             return Padding(
+//               padding: const EdgeInsets.symmetric(horizontal: 2),
+//               child: Text(
+//                 '…',
+//                 style: const TextStyle(fontSize: 13, color: _textMuted),
+//               ),
+//             );
+//           }
+//           final page = item as int;
+//           final active = page == currentPage;
+//           return Padding(
+//             padding: const EdgeInsets.symmetric(horizontal: 2),
+//             child: GestureDetector(
+//               onTap: active ? null : () => onPageChanged(page),
+//               child: AnimatedContainer(
+//                 duration: const Duration(milliseconds: 120),
+//                 width: 32,
+//                 height: 32,
+//                 decoration: BoxDecoration(
+//                   color: active ? _brand : _white,
+//                   border: Border.all(color: active ? _brand : _borderColor),
+//                   borderRadius: BorderRadius.circular(7),
+//                 ),
+//                 alignment: Alignment.center,
+//                 child: Text(
+//                   '$page',
+//                   style: TextStyle(
+//                     fontSize: 13,
+//                     fontWeight: active ? FontWeight.w600 : FontWeight.w400,
+//                     color: active ? _white : _textSecondary,
+//                   ),
+//                 ),
+//               ),
+//             ),
+//           );
+//         }),
+//         const SizedBox(width: 4),
+//         // Next button
+//         _NavBtn(
+//           icon: Icons.chevron_right_rounded,
+//           enabled: currentPage < _totalPages,
+//           onTap: () => onPageChanged(currentPage + 1),
+//         ),
+//       ],
+//     );
+//   }
+// }
+
+// class _NavBtn extends StatelessWidget {
+//   final IconData icon;
+//   final bool enabled;
+//   final VoidCallback onTap;
+
+//   const _NavBtn({
+//     required this.icon,
+//     required this.enabled,
+//     required this.onTap,
+//   });
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return GestureDetector(
+//       onTap: enabled ? onTap : null,
+//       child: Container(
+//         width: 32,
+//         height: 32,
+//         decoration: BoxDecoration(
+//           color: _white,
+//           border: Border.all(color: _borderColor),
+//           borderRadius: BorderRadius.circular(7),
+//         ),
+//         child: Icon(
+//           icon,
+//           size: 18,
+//           color: enabled ? _textSecondary : _textMuted,
+//         ),
+//       ),
+//     );
+//   }
+// }
+

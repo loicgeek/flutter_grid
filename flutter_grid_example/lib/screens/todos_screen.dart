@@ -66,53 +66,53 @@ class _TodosScreenState extends State<TodosScreen> {
       (ctx as CellContext<Todo, Object?>).row.original;
 
   List<ColumnDef<Todo, dynamic>> _buildColumns() => [
-        ColumnDef<Todo, int>.accessor(
-          id: 'id',
-          accessorFn: (t) => t.id,
-          header: '#',
-          size: 60,
-          enableSorting: false,
-          cell: (ctx) => Text(
-            '${_todo(ctx).id}',
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: _brandDark,
-            ),
-          ),
+    ColumnDef<Todo, int>.accessor(
+      id: 'id',
+      accessorFn: (t) => t.id,
+      header: '#',
+      size: 90,
+      enableSorting: false,
+      cell: (ctx) => Text(
+        '${_todo(ctx).id}',
+        style: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: _brandDark,
         ),
-        ColumnDef<Todo, String>.accessor(
-          id: 'todo',
-          accessorFn: (t) => t.todo,
-          header: 'TÂCHE',
-          enableSorting: false,
-          cell: (ctx) => Text(
-            _todo(ctx).todo,
-            style: const TextStyle(fontSize: 13, color: _textPrimary),
-            overflow: TextOverflow.ellipsis,
-            maxLines: 2,
-          ),
-        ),
-        ColumnDef<Todo, bool>.accessor(
-          id: 'completed',
-          accessorFn: (t) => t.completed,
-          header: 'STATUT',
-          size: 120,
-          enableSorting: false,
-          cell: (ctx) => _StatusBadge(completed: _todo(ctx).completed),
-        ),
-        ColumnDef<Todo, int>.accessor(
-          id: 'userId',
-          accessorFn: (t) => t.userId,
-          header: 'USER ID',
-          size: 90,
-          enableSorting: false,
-          cell: (ctx) => Text(
-            'U-${_todo(ctx).userId}',
-            style: const TextStyle(fontSize: 13, color: _textSecondary),
-          ),
-        ),
-      ];
+      ),
+    ),
+    ColumnDef<Todo, String>.accessor(
+      id: 'todo',
+      accessorFn: (t) => t.todo,
+      header: 'TÂCHE',
+      enableSorting: false,
+      cell: (ctx) => Text(
+        _todo(ctx).todo,
+        style: const TextStyle(fontSize: 13, color: _textPrimary),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 2,
+      ),
+    ),
+    ColumnDef<Todo, bool>.accessor(
+      id: 'completed',
+      accessorFn: (t) => t.completed,
+      header: 'STATUT',
+      size: 120,
+      enableSorting: false,
+      cell: (ctx) => _StatusBadge(completed: _todo(ctx).completed),
+    ),
+    ColumnDef<Todo, int>.accessor(
+      id: 'userId',
+      accessorFn: (t) => t.userId,
+      header: 'USER ID',
+      size: 90,
+      enableSorting: false,
+      cell: (ctx) => Text(
+        'U-${_todo(ctx).userId}',
+        style: const TextStyle(fontSize: 13, color: _textSecondary),
+      ),
+    ),
+  ];
 
   // ── Build ─────────────────────────────────────────────────────────────────
 
@@ -153,9 +153,13 @@ class _TodosScreenState extends State<TodosScreen> {
                       borderColor: _borderColor,
                       borderWidth: 1,
                       cellPadding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 8),
+                        horizontal: 20,
+                        vertical: 8,
+                      ),
                       headerPadding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 12),
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
                     ),
                     child: FlutterGrid<Todo>(
                       controller: _controller,
@@ -222,8 +226,7 @@ class _StatusBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: completed ? _greenBg : _grayBadgeBg,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-            color: completed ? _greenBorder : _grayBadgeBorder),
+        border: Border.all(color: completed ? _greenBorder : _grayBadgeBorder),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
