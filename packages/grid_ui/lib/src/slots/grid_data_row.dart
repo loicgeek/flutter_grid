@@ -12,6 +12,7 @@ class GridDataRow<T> extends StatefulWidget {
   final GridController<T> controller;
   final bool isStriped;
   final double? rowHeight;
+  final ScrollController? scrollController;
 
   /// Fire [HapticFeedback.lightImpact] when this row transitions to selected.
   final bool enableHapticFeedback;
@@ -27,6 +28,7 @@ class GridDataRow<T> extends StatefulWidget {
     required this.controller,
     this.isStriped = false,
     this.rowHeight,
+    this.scrollController,
     this.enableHapticFeedback = false,
     this.onTap,
     this.onDoubleTap,
@@ -66,6 +68,15 @@ class _GridDataRowState<T> extends State<GridDataRow<T>> {
 
     final cells = widget.row.getVisibleCells(widget.visibleColumns);
 
+    // Calculate left offsets
+    final leftOffsets = <int, double>{};
+    double currentOffset = 0;
+    for (int i = 0; i < widget.visibleColumns.length; i++) {
+      leftOffsets[i] = currentOffset;
+      currentOffset += widget.visibleColumns[i].effectiveWidth;
+    }
+    final totalWidth = currentOffset;
+
     return Semantics(
       label: 'Row ${widget.row.index + 1}',
       selected: widget.row.isSelected,
@@ -83,9 +94,12 @@ class _GridDataRowState<T> extends State<GridDataRow<T>> {
               : null,
           child: Container(
             height: widget.rowHeight ?? theme.rowHeight,
+            width: totalWidth,
             color: bg,
-            child: Row(
-              children: cells.map((cell) {
+            child: Stack(
+              children: cells.indexed.map((entry) {
+                final i = entry.$1;
+                final cell = entry.$2;
                 final col = cell.column;
                 Widget cellWidget;
 
@@ -109,7 +123,7 @@ class _GridDataRowState<T> extends State<GridDataRow<T>> {
                 if (col.def.textAlignIndex == 1) textAlign = TextAlign.right;
                 if (col.def.textAlignIndex == 2) textAlign = TextAlign.center;
 
-                return Semantics(
+                Widget content = Semantics(
                   label: '${col.def.header ?? col.id}: ${cell.value}',
                   child: SizedBox(
                     width: col.effectiveWidth,
@@ -126,6 +140,62 @@ class _GridDataRowState<T> extends State<GridDataRow<T>> {
                       ),
                     ),
                   ),
+                );
+
+                if (!col.isPinned || widget.scrollController == null) {
+                  return Positioned(
+                    left: leftOffsets[i]!,
+                    child: content,
+                  );
+                }
+
+                return AnimatedBuilder(
+                  animation: widget.scrollController!,
+                  builder: (context, child) {
+                    double offset = leftOffsets[i]!;
+                    final scrollOffset = widget.scrollController!.hasClients
+                        ? widget.scrollController!.offset
+                        : 0.0;
+
+                    BoxShadow? shadow;
+                    if (col.isPinnedLeft) {
+                      offset = offset < scrollOffset ? scrollOffset : offset;
+                      if (offset == scrollOffset) {
+                        shadow = const BoxShadow(
+                          color: Colors.black12,
+                          offset: Offset(2, 0),
+                          blurRadius: 4,
+                        );
+                      }
+                    } else if (col.isPinnedRight) {
+                      final maxScroll = widget.scrollController!.hasClients
+                          ? widget.scrollController!.position.maxScrollExtent
+                          : 0.0;
+                      final maxLeft = totalWidth -
+                          (totalWidth - leftOffsets[i]!) +
+                          (scrollOffset - maxScroll);
+                      offset = offset > maxLeft ? maxLeft : offset;
+                      if (offset == maxLeft) {
+                        shadow = const BoxShadow(
+                          color: Colors.black12,
+                          offset: Offset(-2, 0),
+                          blurRadius: 4,
+                        );
+                      }
+                    }
+
+                    return Positioned(
+                      left: offset,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: bg,
+                          boxShadow: shadow != null ? [shadow] : null,
+                        ),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: content,
                 );
               }).toList(),
             ),

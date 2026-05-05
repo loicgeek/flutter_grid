@@ -79,6 +79,7 @@ class GridState {
   final int? pageCount;
   final Map<String, bool> rowSelection;
   final bool enableMultiRowSelection;
+  final bool selectAllPages;
   final Map<String, bool> columnVisibility;
   final List<String> columnOrder;
   final ColumnPinningState columnPinning;
@@ -99,6 +100,7 @@ class GridState {
     this.pageCount,
     this.rowSelection = const {},
     this.enableMultiRowSelection = true,
+    this.selectAllPages = false,
     this.columnVisibility = const {},
     this.columnOrder = const [],
     this.columnPinning = const ColumnPinningState(),
@@ -121,6 +123,7 @@ class GridState {
     int? pageCount,
     Map<String, bool>? rowSelection,
     bool? enableMultiRowSelection,
+    bool? selectAllPages,
     Map<String, bool>? columnVisibility,
     List<String>? columnOrder,
     ColumnPinningState? columnPinning,
@@ -144,6 +147,7 @@ class GridState {
       rowSelection: rowSelection ?? this.rowSelection,
       enableMultiRowSelection:
           enableMultiRowSelection ?? this.enableMultiRowSelection,
+      selectAllPages: selectAllPages ?? this.selectAllPages,
       columnVisibility: columnVisibility ?? this.columnVisibility,
       columnOrder: columnOrder ?? this.columnOrder,
       columnPinning: columnPinning ?? this.columnPinning,

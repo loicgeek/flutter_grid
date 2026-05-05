@@ -3,10 +3,18 @@ import 'grid_feature.dart';
 enum GroupedColumnMode { reorder, remove, none }
 
 class GroupingFeature extends GridFeature {
-  final GroupedColumnMode groupedColumnMode;
-
-  GroupingFeature({this.groupedColumnMode = GroupedColumnMode.reorder});
-
   @override
   String get featureId => 'grouping';
+
+  @override
+  final bool manual;
+  
+  final GroupedColumnMode groupedColumnMode;
+  final bool enableGrouping;
+
+  const GroupingFeature({
+    this.manual = false,
+    this.groupedColumnMode = GroupedColumnMode.reorder,
+    this.enableGrouping = true,
+  });
 }

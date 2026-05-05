@@ -156,8 +156,8 @@ class GridController<T> {
       // Selection
       ToggleRowSelectionCommand c => _toggleRowSelection(state, c.rowId),
       ToggleAllRowsSelectedCommand c => _toggleAllRows(state, c.value),
-      ClearRowSelectionCommand _ => state.copyWith(rowSelection: {}),
-      SelectAllPagesCommand _ => state, // handled externally with full data
+      ClearRowSelectionCommand _ => state.copyWith(rowSelection: {}, selectAllPages: false),
+      SelectAllPagesCommand c => state.copyWith(selectAllPages: c.value),
 
       // Row expand/pin
       SetRowExpandedCommand c => state.copyWith(
@@ -412,8 +412,21 @@ class GridController<T> {
     for (final row in rows.pageRows) {
       newSelection[row.id] = target;
     }
-    _state = _state.copyWith(rowSelection: newSelection);
+    _state = _state.copyWith(rowSelection: newSelection, selectAllPages: false);
     _notifyListeners();
+  }
+
+  void selectAllPages(bool selected) {
+    if (selected) {
+      // Mark all current local rows as selected first
+      final rows = _buildRowModels(_data);
+      final newSelection = Map<String, bool>.from(_state.rowSelection);
+      for (final row in rows.allRows) {
+        newSelection[row.id] = true;
+      }
+      _state = _state.copyWith(rowSelection: newSelection);
+    }
+    dispatch(SelectAllPagesCommand(selected));
   }
 
   void toggleColumnVisibility(String columnId) =>
@@ -453,10 +466,21 @@ class GridController<T> {
   void startEditingCell(String cellId) =>
       dispatch(StartEditingCellCommand(cellId));
 
-  void commitEdit(String cellId, dynamic value) =>
-      dispatch(CommitEditCommand(cellId, value));
-
   void cancelEdit() => dispatch(const CancelEditCommand());
+
+  /// Executes a command optimistically and rolls it back if the [action] throws.
+  Future<void> executeOptimistic(
+    GridCommand command,
+    Future<void> Function() action,
+  ) async {
+    dispatch(command);
+    try {
+      await action();
+    } catch (e) {
+      undo();
+      rethrow;
+    }
+  }
 
   // Will be called by grid_flutter data sources
   void refresh() {

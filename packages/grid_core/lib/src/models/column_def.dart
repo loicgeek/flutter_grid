@@ -1,6 +1,8 @@
 // IMPORTANT: Pure Dart — no Flutter/dart:ui imports.
 // Widget-returning callbacks use dynamic return type; cast to Widget in grid_ui.
 
+import 'row_model.dart';
+
 /// Hint for the default cell renderer to use.
 enum ColumnType {
   text,
@@ -53,7 +55,7 @@ class ColumnDef<T, V> {
   // Grouping
   final bool enableGrouping;
   final V Function(T row)? getGroupingValue;
-  final V? Function(List<dynamic> leafRows, List<dynamic> childRows)? aggregationFn;
+  final V? Function(List<RowModel<dynamic>> leafRows, List<RowModel<dynamic>> childRows)? aggregationFn;
 
   // Column features
   final bool enableSizing;
@@ -125,7 +127,7 @@ class ColumnDef<T, V> {
     bool enableGlobalFilter = true,
     bool enableGrouping = false,
     V Function(T row)? getGroupingValue,
-    V? Function(List<dynamic>, List<dynamic>)? aggregationFn,
+    V? Function(List<RowModel<dynamic>>, List<RowModel<dynamic>>)? aggregationFn,
     bool enableSizing = true,
     double? size,
     double? minSize,

@@ -49,6 +49,8 @@ class _GridDataTableState<T> extends State<GridDataTable<T>> {
   /// Key reused until a bulk-reset is needed, then replaced to force rebuild.
   var _listKey = GlobalKey<AnimatedListState>();
 
+  final ScrollController _horizontalController = ScrollController();
+
   /// Shadow copy of the rows currently reflected in the AnimatedList.
   late List<RowModel<T>> _rows;
 
@@ -58,6 +60,12 @@ class _GridDataTableState<T> extends State<GridDataTable<T>> {
   void initState() {
     super.initState();
     _rows = List.from(widget.table.pageRows);
+  }
+
+  @override
+  void dispose() {
+    _horizontalController.dispose();
+    super.dispose();
   }
 
   @override
@@ -158,6 +166,7 @@ class _GridDataTableState<T> extends State<GridDataTable<T>> {
           isStriped: widget.striped && index.isOdd,
           rowHeight: widget.rowHeight,
           enableHapticFeedback: widget.enableHapticFeedback,
+          scrollController: _horizontalController,
           onTap: widget.onRowTap,
           onDoubleTap: widget.onRowDoubleTap,
           onLongPress: widget.onRowLongPress,
@@ -204,6 +213,7 @@ class _GridDataTableState<T> extends State<GridDataTable<T>> {
         return ScrollConfiguration(
           behavior: NoBackGestureScrollBehavior(),
           child: SingleChildScrollView(
+            controller: _horizontalController,
             scrollDirection: Axis.horizontal,
             child: SizedBox(
               width: effectiveWidth,
@@ -221,6 +231,7 @@ class _GridDataTableState<T> extends State<GridDataTable<T>> {
                                     group: group,
                                     controller: widget.controller,
                                     visibleColumns: visibleCols,
+                                    scrollController: _horizontalController,
                                   )),
                           if (widget.showColumnBorders)
                             Divider(
@@ -232,12 +243,35 @@ class _GridDataTableState<T> extends State<GridDataTable<T>> {
                       ),
                     ),
                   ),
+                  if (widget.table.topPinnedRows.isNotEmpty)
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) => _buildRow(
+                            widget.table.topPinnedRows[index], index,
+                            isLastRow: widget.table.topPinnedRows.length - 1 == index),
+                        childCount: widget.table.topPinnedRows.length,
+                      ),
+                    ),
                   SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) => _buildRow(_rows[index], index,
-                          isLastRow: _rows.length - index == index),
+                          isLastRow: _rows.length - 1 == index),
                       childCount: _rows.length,
                     ),
+                  ),
+                  if (widget.table.bottomPinnedRows.isNotEmpty)
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) => _buildRow(
+                            widget.table.bottomPinnedRows[index], index,
+                            isLastRow: widget.table.bottomPinnedRows.length - 1 == index),
+                        childCount: widget.table.bottomPinnedRows.length,
+                      ),
+                    ),
+                  SliverToBoxAdapter(
+                    child: widget.slots?.aggregationFooter != null
+                        ? widget.slots!.aggregationFooter!(context, widget.table)
+                        : const SizedBox.shrink(),
                   ),
                 ],
               ),

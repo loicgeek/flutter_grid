@@ -20,6 +20,7 @@ class GridSlots<T> {
   final Widget Function(BuildContext, GridTableState<T>)? toolbar;
   final Widget Function(BuildContext, GridTableState<T>)? pagination;
   final Widget Function(BuildContext, GridTableState<T>)? bulkActionBar;
+  final Widget Function(BuildContext, GridTableState<T>)? aggregationFooter;
   final Widget Function(BuildContext, RowModel<T> row)? rowLeading;
   final Widget Function(BuildContext, RowModel<T> row)? rowTrailing;
 
@@ -30,6 +31,7 @@ class GridSlots<T> {
     this.toolbar,
     this.pagination,
     this.bulkActionBar,
+    this.aggregationFooter,
     this.rowLeading,
     this.rowTrailing,
   });

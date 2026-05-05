@@ -43,6 +43,7 @@ class RowModel<T> {
   final String id;
   final T original;
   final int index;
+  final int originalIndex;
   final bool isSelected;
   final bool isExpanded;
   final bool isPinnedTop;
@@ -50,6 +51,12 @@ class RowModel<T> {
   final List<RowModel<T>> subRows;
   final int depth;
   final RowModel<T>? parentRow;
+  
+  final bool isGrouped;
+  final bool isAggregated;
+  final String? groupingColumnId;
+  final dynamic groupingValue;
+
   // Controller reference — set after construction by pipeline
   final dynamic
       _controller; // GridController<T> — dynamic to avoid circular import in pipeline
@@ -58,6 +65,7 @@ class RowModel<T> {
     required this.id,
     required this.original,
     required this.index,
+    this.originalIndex = -1,
     this.isSelected = false,
     this.isExpanded = false,
     this.isPinnedTop = false,
@@ -65,6 +73,10 @@ class RowModel<T> {
     this.subRows = const [],
     this.depth = 0,
     this.parentRow,
+    this.isGrouped = false,
+    this.isAggregated = false,
+    this.groupingColumnId,
+    this.groupingValue,
     dynamic controller,
   }) : _controller = controller;
 
@@ -72,6 +84,7 @@ class RowModel<T> {
     String? id,
     T? original,
     int? index,
+    int? originalIndex,
     bool? isSelected,
     bool? isExpanded,
     bool? isPinnedTop,
@@ -79,12 +92,17 @@ class RowModel<T> {
     List<RowModel<T>>? subRows,
     int? depth,
     RowModel<T>? parentRow,
+    bool? isGrouped,
+    bool? isAggregated,
+    String? groupingColumnId,
+    dynamic groupingValue,
     dynamic controller,
   }) {
     return RowModel<T>(
       id: id ?? this.id,
       original: original ?? this.original,
       index: index ?? this.index,
+      originalIndex: originalIndex ?? this.originalIndex,
       isSelected: isSelected ?? this.isSelected,
       isExpanded: isExpanded ?? this.isExpanded,
       isPinnedTop: isPinnedTop ?? this.isPinnedTop,
@@ -92,6 +110,10 @@ class RowModel<T> {
       subRows: subRows ?? this.subRows,
       depth: depth ?? this.depth,
       parentRow: parentRow ?? this.parentRow,
+      isGrouped: isGrouped ?? this.isGrouped,
+      isAggregated: isAggregated ?? this.isAggregated,
+      groupingColumnId: groupingColumnId ?? this.groupingColumnId,
+      groupingValue: groupingValue ?? this.groupingValue,
       controller: controller ?? _controller,
     );
   }

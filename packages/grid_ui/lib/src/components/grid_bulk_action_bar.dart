@@ -36,11 +36,18 @@ class GridBulkActionBar<T> extends StatelessWidget {
         final selectedCount = controller.state.selectedCount;
         if (selectedCount == 0) return const SizedBox.shrink();
 
-        final selectedRows = controller
-            .getRowModels()
-            .pageRows
+        final rowModels = controller.getRowModels();
+        final totalRows = rowModels.totalRows;
+        final selectAllPages = controller.state.selectAllPages;
+        final selectedRows = rowModels.pageRows
             .where((r) => r.isSelected)
             .toList();
+
+        final selectionFeature = controller.options.features
+            .whereType<SelectionFeature>()
+            .firstOrNull;
+        final enableSelectAllPages =
+            selectionFeature?.enableSelectAllPages ?? false;
 
         return Container(
           color: Theme.of(context).colorScheme.primaryContainer,
@@ -48,12 +55,24 @@ class GridBulkActionBar<T> extends StatelessWidget {
           child: Row(
             children: [
               Text(
-                '$selectedCount selected',
+                selectAllPages
+                    ? 'All $totalRows items selected'
+                    : '$selectedCount selected',
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   color: Theme.of(context).colorScheme.onPrimaryContainer,
                 ),
               ),
+              if (enableSelectAllPages &&
+                  !selectAllPages &&
+                  selectedCount == rowModels.pageRows.length &&
+                  totalRows > selectedCount) ...[
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: () => controller.selectAllPages(true),
+                  child: Text('Select all $totalRows items'),
+                ),
+              ],
               const SizedBox(width: 16),
               ...actions.map((action) => Padding(
                     padding: const EdgeInsets.only(right: 8),

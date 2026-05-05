@@ -203,14 +203,15 @@ class ClearRowSelectionCommand extends GridCommand {
 }
 
 class SelectAllPagesCommand extends GridCommand {
+  final bool value;
   @override
   final GridState? prevState;
 
-  const SelectAllPagesCommand({this.prevState});
+  const SelectAllPagesCommand(this.value, {this.prevState});
 
   @override
   GridCommand withPrevState(GridState state) =>
-      SelectAllPagesCommand(prevState: state);
+      SelectAllPagesCommand(value, prevState: state);
 }
 
 // ---------------------------------------------------------------------------
