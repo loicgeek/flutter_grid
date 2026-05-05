@@ -9,21 +9,23 @@ import '../data/client.dart';
 
 const _brand = Color(0xFF6B5AED);
 const _brandSoft = Color(0xFFF1EEFE);
-const _brandHover = Color(0xFFFAF9FF);
+const _brandHover = Color(0xFFF9FAFB); // neutral-50
 const _brandDark = Color(0xFF4B3BC6);
 
-const _textPrimary = Color(0xFF404040);
-const _textSecondary = Color(0xFF737373);
-const _textMuted = Color(0xFFa3a3a3);
+const _textPrimary = Color(0xFF171717); // neutral-900
+const _textSecondary = Color(0xFF737373); // neutral-500
+const _textMuted = Color(0xFFa3a3a3); // neutral-400
 
-const _borderColor = Color(0xFFE2E8F0);
+const _borderColor = Color(0xFFE5E7EB); // neutral-200
 const _surfaceGray = Color(0xFFfafafa);
 const _white = Color(0xFFFFFFFF);
 
-const _green = Color(0xFF047857);
-const _greenBg = Color(0xFFecfdf5);
-const _grayBadgeBg = Color(0xFFF1F5F9);
-const _grayBadgeFg = Color(0xFF475569);
+const _green = Color(0xFF15803D); // emerald-700
+const _greenBg = Color(0xFFecfdf5); // emerald-50
+const _greenBorder = Color(0xFFD1FAE5); // emerald-100
+const _grayBadgeBg = Color(0xFFF3F4F6);
+const _grayBadgeFg = Color(0xFF525252);
+const _grayBadgeBorder = Color(0xFFE5E7EB);
 
 // ── Status filter enum ────────────────────────────────────────────────────────
 
@@ -144,14 +146,7 @@ class _NeeroClientsScreenState extends State<NeeroClientsScreen> {
       header: 'PERSON ID',
       // size: 148,
       enableSorting: false,
-      cell: (ctx) => Text(
-        _client(ctx).personId,
-        style: GoogleFonts.jetBrainsMono(
-          fontSize: 13,
-          color: _brandDark,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
+      cell: (ctx) => _PersonIdCell(id: _client(ctx).personId),
     ),
     ColumnDef<Client, String>.accessor(
       id: 'phone',
@@ -216,14 +211,6 @@ class _NeeroClientsScreenState extends State<NeeroClientsScreen> {
       enableSorting: false,
       cell: (ctx) => _StatusBadge(active: _client(ctx).isActive),
     ),
-    ColumnDef<Client, String>.accessor(
-      id: 'plan',
-      accessorFn: (c) => c.plan.name,
-      header: 'PLAN',
-      // size: 108,
-      enableSorting: false,
-      cell: (ctx) => _PlanBadge(plan: _client(ctx).plan),
-    ),
     ColumnDef<Client, DateTime?>.accessor(
       id: 'lastLogin',
       accessorFn: (c) => c.lastLogin,
@@ -235,7 +222,7 @@ class _NeeroClientsScreenState extends State<NeeroClientsScreen> {
     ColumnDef<Client, String>.display(
       id: 'actions',
       header: '',
-      // size: 172,
+      size: 100,
       // textAlignIndex: 2,
       enablePinning: true,
 
@@ -600,12 +587,12 @@ class _ClientTable extends StatelessWidget {
           headerBackground: _surfaceGray,
           headerForeground: _textSecondary,
           headerTextStyle: const TextStyle(
-            fontSize: 11,
+            fontSize: 11.5,
             fontWeight: FontWeight.w600,
             color: _textSecondary,
-            letterSpacing: 0.6,
+            letterSpacing: 0.5,
           ),
-          headerHeight: 55,
+          headerHeight: 44,
           rowHeight: 60,
           rowBackground: _white,
           alternateRowBackground: _white,
@@ -613,10 +600,10 @@ class _ClientTable extends StatelessWidget {
           hoverRowBackground: _brandHover,
           borderColor: _borderColor,
           borderWidth: 1,
-          cellPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          cellPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
           headerPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 0,
+            horizontal: 20,
+            vertical: 12,
           ),
         ),
         child: GridBuilder<Client>(
@@ -636,16 +623,16 @@ class _ClientTable extends StatelessWidget {
 
 // ── Cell widgets ──────────────────────────────────────────────────────────────
 
-/// Person ID pill with inline copy button.
-class _PersonIdChip extends StatefulWidget {
+/// Person ID: monospace styled text + inline copy icon, no container.
+class _PersonIdCell extends StatefulWidget {
   final String id;
-  const _PersonIdChip({required this.id});
+  const _PersonIdCell({required this.id});
 
   @override
-  State<_PersonIdChip> createState() => _PersonIdChipState();
+  State<_PersonIdCell> createState() => _PersonIdCellState();
 }
 
-class _PersonIdChipState extends State<_PersonIdChip> {
+class _PersonIdCellState extends State<_PersonIdCell> {
   bool _copied = false;
 
   void _copy() async {
@@ -657,37 +644,28 @@ class _PersonIdChipState extends State<_PersonIdChip> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: _copy,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: _grayBadgeBg,
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: _borderColor),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          widget.id,
+          style: GoogleFonts.jetBrainsMono(
+            fontSize: 12.5,
+            fontWeight: FontWeight.w600,
+            color: _brandDark,
+            fontFeatures: [const FontFeature.tabularFigures()],
+          ),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              widget.id,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: _textSecondary,
-                fontFeatures: [FontFeature.tabularFigures()],
-                letterSpacing: 0.2,
-              ),
-            ),
-            const SizedBox(width: 5),
-            Icon(
-              _copied ? Icons.check_rounded : Icons.copy_outlined,
-              size: 12,
-              color: _copied ? _green : _textMuted,
-            ),
-          ],
+        const SizedBox(width: 6),
+        GestureDetector(
+          onTap: _copy,
+          child: Icon(
+            _copied ? Icons.check_rounded : Icons.copy_outlined,
+            size: 13,
+            color: _copied ? _green : _textMuted,
+          ),
         ),
-      ),
+      ],
     );
   }
 }
@@ -700,10 +678,11 @@ class _StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: active ? _greenBg : _grayBadgeBg,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: active ? _greenBorder : _grayBadgeBorder),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -712,7 +691,7 @@ class _StatusBadge extends StatelessWidget {
             width: 6,
             height: 6,
             decoration: BoxDecoration(
-              color: active ? _green : _textMuted,
+              color: active ? const Color(0xFF10B981) : const Color(0xFF9CA3AF),
               shape: BoxShape.circle,
             ),
           ),
@@ -720,47 +699,12 @@ class _StatusBadge extends StatelessWidget {
           Text(
             active ? 'Actif' : 'Inactif',
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 11.5,
               fontWeight: FontWeight.w600,
-              color: active ? _green : _textSecondary,
+              color: active ? _green : _grayBadgeFg,
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Plan badge with tier-specific colors.
-class _PlanBadge extends StatelessWidget {
-  final ClientPlan plan;
-  const _PlanBadge({required this.plan});
-
-  @override
-  Widget build(BuildContext context) {
-    final (bg, fg, label) = switch (plan) {
-      ClientPlan.standard => (
-        const Color(0xFFF1F5F9),
-        _grayBadgeFg,
-        'Standard',
-      ),
-      ClientPlan.plus => (
-        const Color(0xFFEFF6FF),
-        const Color(0xFF1D4ED8),
-        'Plus',
-      ),
-      ClientPlan.premium => (_brandSoft, _brandDark, 'Premium'),
-    };
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: fg),
       ),
     );
   }
@@ -934,7 +878,7 @@ class _Pagination extends StatelessWidget {
               value: pageSize,
               isDense: true,
               style: const TextStyle(fontSize: 13, color: _textSecondary),
-              items: [10, 25, 50]
+              items: [5, 10, 25, 50, 100]
                   .map(
                     (n) => DropdownMenuItem(value: n, child: Text('$n / page')),
                   )
@@ -944,14 +888,28 @@ class _Pagination extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 12),
-        Text(
-          '$_from–$_to sur $totalItems',
-          style: const TextStyle(fontSize: 13, color: _textSecondary),
+        RichText(
+          text: TextSpan(
+            style: const TextStyle(fontSize: 13, color: _textSecondary),
+            children: [
+              const TextSpan(text: 'Affichage '),
+              TextSpan(
+                text: '$_from–$_to',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: _textPrimary,
+                ),
+              ),
+              TextSpan(text: ' sur $totalItems clients'),
+            ],
+          ),
         ),
         const Spacer(),
         // Prev button
         _NavBtn(
+          label: 'Précédent',
           icon: Icons.chevron_left_rounded,
+          iconLeft: true,
           enabled: currentPage > 1,
           onTap: () => onPageChanged(currentPage - 1),
         ),
@@ -998,7 +956,9 @@ class _Pagination extends StatelessWidget {
         const SizedBox(width: 4),
         // Next button
         _NavBtn(
+          label: 'Suivant',
           icon: Icons.chevron_right_rounded,
+          iconLeft: false,
           enabled: currentPage < _totalPages,
           onTap: () => onPageChanged(currentPage + 1),
         ),
@@ -1008,34 +968,217 @@ class _Pagination extends StatelessWidget {
 }
 
 class _NavBtn extends StatelessWidget {
+  final String label;
   final IconData icon;
+  final bool iconLeft;
   final bool enabled;
   final VoidCallback onTap;
 
   const _NavBtn({
+    required this.label,
     required this.icon,
+    required this.iconLeft,
     required this.enabled,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final color = enabled ? _textSecondary : _textMuted;
+    final iconWidget = Icon(icon, size: 16, color: color);
     return GestureDetector(
       onTap: enabled ? onTap : null,
       child: Container(
-        width: 32,
         height: 32,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
           color: _white,
           border: Border.all(color: _borderColor),
           borderRadius: BorderRadius.circular(7),
         ),
-        child: Icon(
-          icon,
-          size: 18,
-          color: enabled ? _textSecondary : _textMuted,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: iconLeft
+              ? [
+                  iconWidget,
+                  const SizedBox(width: 4),
+                  Text(label, style: TextStyle(fontSize: 13, color: color)),
+                ]
+              : [
+                  Text(label, style: TextStyle(fontSize: 13, color: color)),
+                  const SizedBox(width: 4),
+                  iconWidget,
+                ],
         ),
       ),
     );
   }
 }
+
+
+
+// class _Pagination extends StatelessWidget {
+//   final int totalItems;
+//   final int currentPage;
+//   final int pageSize;
+//   final void Function(int) onPageChanged;
+//   final void Function(int) onPageSizeChanged;
+
+//   const _Pagination({
+//     required this.totalItems,
+//     required this.currentPage,
+//     required this.pageSize,
+//     required this.onPageChanged,
+//     required this.onPageSizeChanged,
+//   });
+
+//   int get _totalPages =>
+//       totalItems == 0 ? 1 : ((totalItems + pageSize - 1) ~/ pageSize);
+
+//   int get _from => totalItems == 0 ? 0 : (currentPage - 1) * pageSize + 1;
+//   int get _to => (currentPage * pageSize).clamp(0, totalItems);
+
+//   List<Object> _pageNumbers() {
+//     final total = _totalPages;
+//     if (total <= 7) return List.generate(total, (i) => i + 1);
+
+//     final result = <Object>[];
+//     result.add(1);
+//     if (currentPage > 3) result.add('…');
+
+//     final start = (currentPage - 1).clamp(2, total - 1);
+//     final end = (currentPage + 1).clamp(2, total - 1);
+//     for (int i = start; i <= end; i++) {
+//       result.add(i);
+//     }
+
+//     if (currentPage < total - 2) result.add('…');
+//     result.add(total);
+
+//     return result;
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Row(
+//       children: [
+//         // Page size selector
+//         Container(
+//           height: 34,
+//           padding: const EdgeInsets.symmetric(horizontal: 10),
+//           decoration: BoxDecoration(
+//             color: _white,
+//             border: Border.all(color: _borderColor),
+//             borderRadius: BorderRadius.circular(7),
+//           ),
+//           child: DropdownButtonHideUnderline(
+//             child: DropdownButton<int>(
+//               value: pageSize,
+//               isDense: true,
+//               style: const TextStyle(fontSize: 13, color: _textSecondary),
+//               items: [10, 25, 50]
+//                   .map(
+//                     (n) => DropdownMenuItem(value: n, child: Text('$n / page')),
+//                   )
+//                   .toList(),
+//               onChanged: (v) => v != null ? onPageSizeChanged(v) : null,
+//             ),
+//           ),
+//         ),
+//         const SizedBox(width: 12),
+//         Text(
+//           '$_from–$_to sur $totalItems',
+//           style: const TextStyle(fontSize: 13, color: _textSecondary),
+//         ),
+//         const Spacer(),
+//         // Prev button
+//         _NavBtn(
+//           icon: Icons.chevron_left_rounded,
+//           enabled: currentPage > 1,
+//           onTap: () => onPageChanged(currentPage - 1),
+//         ),
+//         const SizedBox(width: 4),
+//         // Page number chips
+//         ..._pageNumbers().map((item) {
+//           if (item is String) {
+//             return Padding(
+//               padding: const EdgeInsets.symmetric(horizontal: 2),
+//               child: Text(
+//                 '…',
+//                 style: const TextStyle(fontSize: 13, color: _textMuted),
+//               ),
+//             );
+//           }
+//           final page = item as int;
+//           final active = page == currentPage;
+//           return Padding(
+//             padding: const EdgeInsets.symmetric(horizontal: 2),
+//             child: GestureDetector(
+//               onTap: active ? null : () => onPageChanged(page),
+//               child: AnimatedContainer(
+//                 duration: const Duration(milliseconds: 120),
+//                 width: 32,
+//                 height: 32,
+//                 decoration: BoxDecoration(
+//                   color: active ? _brand : _white,
+//                   border: Border.all(color: active ? _brand : _borderColor),
+//                   borderRadius: BorderRadius.circular(7),
+//                 ),
+//                 alignment: Alignment.center,
+//                 child: Text(
+//                   '$page',
+//                   style: TextStyle(
+//                     fontSize: 13,
+//                     fontWeight: active ? FontWeight.w600 : FontWeight.w400,
+//                     color: active ? _white : _textSecondary,
+//                   ),
+//                 ),
+//               ),
+//             ),
+//           );
+//         }),
+//         const SizedBox(width: 4),
+//         // Next button
+//         _NavBtn(
+//           icon: Icons.chevron_right_rounded,
+//           enabled: currentPage < _totalPages,
+//           onTap: () => onPageChanged(currentPage + 1),
+//         ),
+//       ],
+//     );
+//   }
+// }
+
+// class _NavBtn extends StatelessWidget {
+//   final IconData icon;
+//   final bool enabled;
+//   final VoidCallback onTap;
+
+//   const _NavBtn({
+//     required this.icon,
+//     required this.enabled,
+//     required this.onTap,
+//   });
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return GestureDetector(
+//       onTap: enabled ? onTap : null,
+//       child: Container(
+//         width: 32,
+//         height: 32,
+//         decoration: BoxDecoration(
+//           color: _white,
+//           border: Border.all(color: _borderColor),
+//           borderRadius: BorderRadius.circular(7),
+//         ),
+//         child: Icon(
+//           icon,
+//           size: 18,
+//           color: enabled ? _textSecondary : _textMuted,
+//         ),
+//       ),
+//     );
+//   }
+// }
+
