@@ -115,6 +115,8 @@ class GridController<T> {
 
   // --- State reducer ---
 
+  static const _defaultMinColumnWidth = 80.0;
+
   Map<String, num> resolveColumnWidths(double availableWidth) {
     final cols = _buildColumns();
 
@@ -122,9 +124,7 @@ class GridController<T> {
     int autoCount = 0;
 
     for (final c in cols) {
-      final isAuto = c.def.size == null;
-
-      if (isAuto) {
+      if (c.def.size == null) {
         autoCount++;
       } else {
         fixedWidth += c.def.size!;
@@ -132,10 +132,19 @@ class GridController<T> {
     }
 
     final remaining = (availableWidth - fixedWidth).clamp(0, double.infinity);
-    final autoWidth = autoCount == 0 ? 0 : remaining / autoCount;
+    final rawAutoWidth = autoCount == 0 ? 0.0 : remaining / autoCount;
 
     return {
-      for (final c in cols) c.id: c.def.size ?? autoWidth,
+      for (final c in cols)
+        c.id: c.def.size != null
+            ? c.def.size!.clamp(
+                c.def.minSize ?? 0,
+                c.def.maxSize ?? double.infinity,
+              )
+            : rawAutoWidth.clamp(
+                c.def.minSize ?? _defaultMinColumnWidth,
+                c.def.maxSize ?? double.infinity,
+              ),
     };
   }
 
