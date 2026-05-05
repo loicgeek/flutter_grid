@@ -1,0 +1,3 @@
+dependency_overrides:
+  grid_core:
+    path: ../grid_core

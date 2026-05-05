@@ -1,6 +1,19 @@
 name: grid_export
-description: CSV export and clipboard utilities for flutter_grid
+description: >-
+  Optional CSV export and clipboard add-on for flutter_grid. Converts any
+  GridController state (all rows or current page) to a CSV / TSV string and
+  copies it to the system clipboard with a single call.
 version: 0.1.0
+repository: https://github.com/loicgeek/flutter_grid/tree/main/packages/grid_export
+issue_tracker: https://github.com/loicgeek/flutter_grid/issues
+homepage: https://github.com/loicgeek/flutter_grid
+
+topics:
+  - table
+  - grid
+  - csv
+  - flutter-grid
+
 environment:
   sdk: '>=3.3.0 <4.0.0'
   flutter: '>=3.19.0'
@@ -8,5 +21,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  grid_core:
-    path: ../grid_core
+  grid_core: ^0.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  lints: ^4.0.0

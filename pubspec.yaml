@@ -1,6 +1,20 @@
 name: flutter_grid
-description: Full-featured data table library for Flutter — TanStack Table-inspired
+description: >-
+  A full-featured, TanStack Table–inspired data grid for Flutter. Sorting,
+  filtering, pagination, grouping, selection, column pinning, row pinning,
+  expanding rows, server-side data sources — all via composable opt-in features.
 version: 0.1.0
+repository: https://github.com/loicgeek/flutter_grid
+issue_tracker: https://github.com/loicgeek/flutter_grid/issues
+homepage: https://github.com/loicgeek/flutter_grid
+
+topics:
+  - table
+  - grid
+  - data-table
+  - flutter-grid
+  - datagrid
+
 environment:
   sdk: '>=3.3.0 <4.0.0'
   flutter: '>=3.19.0'
@@ -8,9 +22,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  grid_core:
-    path: packages/grid_core
-  grid_flutter:
-    path: packages/grid_flutter
-  grid_ui:
-    path: packages/grid_ui
+  grid_core: ^0.1.0
+  grid_flutter: ^0.1.0
+  grid_ui: ^0.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  lints: ^4.0.0

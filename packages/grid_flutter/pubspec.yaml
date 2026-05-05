@@ -1,6 +1,19 @@
 name: grid_flutter
-description: Flutter bindings for grid_core
+description: >-
+  Flutter bindings for flutter_grid. Provides GridBuilder (reactive widget),
+  GridDataSource implementations (REST via Dio, stream, in-memory), and the
+  GridPage / GridQuery models for server-side pagination.
 version: 0.1.0
+repository: https://github.com/loicgeek/flutter_grid/tree/main/packages/grid_flutter
+issue_tracker: https://github.com/loicgeek/flutter_grid/issues
+homepage: https://github.com/loicgeek/flutter_grid
+
+topics:
+  - table
+  - grid
+  - data-table
+  - flutter-grid
+
 environment:
   sdk: '>=3.3.0 <4.0.0'
   flutter: '>=3.19.0'
@@ -8,8 +21,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  grid_core:
-    path: ../grid_core
+  grid_core: ^0.1.0
   dio: ^5.4.0
   shared_preferences: ^2.2.0
 

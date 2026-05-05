@@ -1,0 +1,5 @@
+dependency_overrides:
+  grid_core:
+    path: ../grid_core
+  grid_flutter:
+    path: ../grid_flutter

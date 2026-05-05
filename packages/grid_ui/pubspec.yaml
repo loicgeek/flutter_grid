@@ -1,6 +1,20 @@
 name: grid_ui
-description: Pre-built UI components for flutter_grid
+description: >-
+  Pre-built UI layer for flutter_grid. Ships FlutterGrid, GridDataTable,
+  GridTheme, GridSlots, built-in cell renderers (badge, avatar, progress, link,
+  money, date, boolean…), toolbar, search, and pagination widgets.
 version: 0.1.0
+repository: https://github.com/loicgeek/flutter_grid/tree/main/packages/grid_ui
+issue_tracker: https://github.com/loicgeek/flutter_grid/issues
+homepage: https://github.com/loicgeek/flutter_grid
+
+topics:
+  - table
+  - grid
+  - data-table
+  - flutter-grid
+  - ui
+
 environment:
   sdk: '>=3.3.0 <4.0.0'
   flutter: '>=3.19.0'
@@ -8,10 +22,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  grid_core:
-    path: ../grid_core
-  grid_flutter:
-    path: ../grid_flutter
+  grid_core: ^0.1.0
+  grid_flutter: ^0.1.0
 
 dev_dependencies:
   flutter_test:
