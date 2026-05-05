@@ -1,21 +1,21 @@
 # grid_ui
 
-Pre-built UI layer of [flutter_grid](https://pub.dev/packages/flutter_grid).
+Pre-built UI layer of [ntech_grid](https://pub.dev/packages/ntech_grid).
 
 Ships `FlutterGrid`, `GridDataTable`, `GridTheme`, `GridSlots`, built-in cell
 renderers, toolbar, search, pagination, and bulk-action bar.
 
-## Part of flutter_grid
+## Part of ntech_grid
 
 Most users should depend on the top-level package instead:
 
 ```yaml
 dependencies:
-  flutter_grid: ^0.1.0
+  ntech_grid: ^0.1.0
 ```
 
 ```dart
-import 'package:flutter_grid/flutter_grid.dart';
+import 'package:ntech_grid/ntech_grid.dart';
 ```
 
 ## Quick example

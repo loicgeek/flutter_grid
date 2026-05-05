@@ -1,4 +1,4 @@
-/// Pure Dart core for flutter_grid — headless table logic.
+/// Pure Dart core for ntech_grid — headless table logic.
 /// No Flutter or dart:ui imports allowed in this package.
 library grid_core;
 

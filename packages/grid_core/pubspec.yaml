@@ -1,6 +1,6 @@
 name: grid_core
 description: >-
-  Headless, pure-Dart core for flutter_grid. Provides the controller, state
+  Headless, pure-Dart core for ntech_grid. Provides the controller, state
   machine, column definitions, pipeline (sort/filter/paginate/group), and the
   GridDataSource abstraction — no Flutter dependency.
 version: 0.1.0

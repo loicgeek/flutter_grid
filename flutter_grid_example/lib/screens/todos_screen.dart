@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_grid/flutter_grid.dart';
+import 'package:ntech_grid/ntech_grid.dart';
 
 import '../data/todo.dart';
 import '../data/todos_data_source.dart';

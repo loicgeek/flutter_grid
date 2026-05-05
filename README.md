@@ -37,16 +37,25 @@ Sorting, filtering, pagination, grouping, selection, pinning, editing — all co
 
 ```yaml
 dependencies:
-  flutter_grid:
-    path: ../flutter_grid   # or your pub.dev version
+  ntech_grid: ^0.1.0
 
   # Optional: CSV export
+  grid_export: ^0.1.0
+```
+
+Or with local paths during development:
+
+```yaml
+dependencies:
+  ntech_grid:
+    path: ../flutter_grid        # path to your local clone
+
   grid_export:
     path: ../flutter_grid/packages/grid_export
 ```
 
 ```dart
-import 'package:flutter_grid/flutter_grid.dart';
+import 'package:ntech_grid/ntech_grid.dart';
 // Optional:
 import 'package:grid_export/grid_export.dart';
 ```
@@ -56,13 +65,13 @@ import 'package:grid_export/grid_export.dart';
 ## Package layout
 
 ```
-flutter_grid/              ← meta-package, re-exports everything
-packages/
-  grid_core/               ← pure Dart: models, state, pipeline, controller
-  grid_flutter/            ← Flutter bindings: GridBuilder, data sources
-  grid_ui/                 ← pre-built UI: FlutterGrid, cells, theme, slots
-  grid_export/             ← opt-in: CSV export and clipboard copy
-flutter_grid_example/      ← demo app (6 screens)
+ntech_grid  (package name)  ← meta-package, re-exports everything
+  packages/
+    grid_core/               ← pure Dart: models, state, pipeline, controller
+    grid_flutter/            ← Flutter bindings: GridBuilder, data sources
+    grid_ui/                 ← pre-built UI: FlutterGrid, cells, theme, slots
+    grid_export/             ← opt-in: CSV export and clipboard copy
+  flutter_grid_example/      ← demo app (6 screens)
 ```
 
 ---

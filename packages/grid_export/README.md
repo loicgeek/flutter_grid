@@ -1,6 +1,6 @@
 # grid_export
 
-Optional CSV export add-on for [flutter_grid](https://pub.dev/packages/flutter_grid).
+Optional CSV export add-on for [ntech_grid](https://pub.dev/packages/ntech_grid).
 
 Converts any `GridController` state (all filtered rows or the current page) into
 a CSV / TSV string, and copies it to the system clipboard with a single call.
@@ -9,7 +9,7 @@ a CSV / TSV string, and copies it to the system clipboard with a single call.
 
 ```yaml
 dependencies:
-  flutter_grid: ^0.1.0      # main package
+  ntech_grid: ^0.1.0      # main package
   grid_export: ^0.1.0       # this add-on
 ```
 

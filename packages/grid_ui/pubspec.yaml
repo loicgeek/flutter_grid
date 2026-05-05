@@ -1,6 +1,6 @@
 name: grid_ui
 description: >-
-  Pre-built UI layer for flutter_grid. Ships FlutterGrid, GridDataTable,
+  Pre-built UI layer for ntech_grid. Ships FlutterGrid, GridDataTable,
   GridTheme, GridSlots, built-in cell renderers (badge, avatar, progress, link,
   money, date, boolean…), toolbar, search, and pagination widgets.
 version: 0.1.0

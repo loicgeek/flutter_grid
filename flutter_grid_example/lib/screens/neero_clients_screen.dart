@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_grid/flutter_grid.dart';
+import 'package:ntech_grid/ntech_grid.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../data/client.dart';

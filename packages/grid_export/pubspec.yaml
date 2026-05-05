@@ -1,6 +1,6 @@
 name: grid_export
 description: >-
-  Optional CSV export and clipboard add-on for flutter_grid. Converts any
+  Optional CSV export and clipboard add-on for ntech_grid. Converts any
   GridController state (all rows or current page) to a CSV / TSV string and
   copies it to the system clipboard with a single call.
 version: 0.1.0

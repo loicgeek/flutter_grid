@@ -1,22 +1,22 @@
 # grid_flutter
 
-Flutter bindings layer of [flutter_grid](https://pub.dev/packages/flutter_grid).
+Flutter bindings layer of [ntech_grid](https://pub.dev/packages/ntech_grid).
 
 Provides `GridBuilder` (reactive widget), ready-made `GridDataSource`
 implementations, and the `GridPage` / `GridQuery` pipeline for server-side
 pagination.
 
-## Part of flutter_grid
+## Part of ntech_grid
 
 Most users should depend on the top-level package instead:
 
 ```yaml
 dependencies:
-  flutter_grid: ^0.1.0
+  ntech_grid: ^0.1.0
 ```
 
 ```dart
-import 'package:flutter_grid/flutter_grid.dart';
+import 'package:ntech_grid/ntech_grid.dart';
 ```
 
 Use `grid_flutter` directly only if you need the Flutter bindings without the

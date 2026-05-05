@@ -1,4 +1,4 @@
-/// Pre-built UI components for flutter_grid.
+/// Pre-built UI components for ntech_grid.
 library grid_ui;
 
 // Theme

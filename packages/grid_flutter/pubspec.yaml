@@ -1,6 +1,6 @@
 name: grid_flutter
 description: >-
-  Flutter bindings for flutter_grid. Provides GridBuilder (reactive widget),
+  Flutter bindings for ntech_grid. Provides GridBuilder (reactive widget),
   GridDataSource implementations (REST via Dio, stream, in-memory), and the
   GridPage / GridQuery models for server-side pagination.
 version: 0.1.0

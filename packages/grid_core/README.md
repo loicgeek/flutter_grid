@@ -1,20 +1,20 @@
 # grid_core
 
-Headless, pure-Dart core of [flutter_grid](https://pub.dev/packages/flutter_grid).
+Headless, pure-Dart core of [ntech_grid](https://pub.dev/packages/ntech_grid).
 
 Contains the controller, state machine, column definitions, sort/filter/paginate/group pipeline, and the `GridDataSource` abstraction — **no Flutter dependency**.
 
-## Part of flutter_grid
+## Part of ntech_grid
 
 Most users should depend on the top-level package instead:
 
 ```yaml
 dependencies:
-  flutter_grid: ^0.1.0
+  ntech_grid: ^0.1.0
 ```
 
 ```dart
-import 'package:flutter_grid/flutter_grid.dart';
+import 'package:ntech_grid/ntech_grid.dart';
 ```
 
 Use `grid_core` directly only if you need the headless logic without any UI layer (e.g. a pure-Dart server, unit tests, or a custom renderer).
