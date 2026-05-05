@@ -1,6 +1,6 @@
 name: flutter_grid
 description: >-
-  A full-featured, TanStack Table–inspired data grid for Flutter. Sorting,
+  A full-featured, TanStack Table-inspired data grid for Flutter. Sorting,
   filtering, pagination, grouping, selection, column pinning, row pinning,
   expanding rows, server-side data sources — all via composable opt-in features.
 version: 0.1.0
