@@ -61,6 +61,7 @@ class GridBuilder<T> extends StatefulWidget {
 class _GridBuilderState<T> extends State<GridBuilder<T>> {
   bool _isLoading = false;
   String? _error;
+  bool _isFetching = false;
   StreamSubscription<List<T>>? _watchSub;
 
   @override
@@ -100,6 +101,9 @@ class _GridBuilderState<T> extends State<GridBuilder<T>> {
   Future<void> _fetchIfNeeded() async {
     final ds = widget.dataSource;
     if (ds == null) return;
+    // Guard against re-entrant calls triggered by setData/setDataWithPageCount
+    // notifying listeners while a fetch is already in progress.
+    if (_isFetching) return;
 
     // Try watch first (streaming)
     final watchStream = ds.watch(widget.controller.state.toQuery());
@@ -109,7 +113,7 @@ class _GridBuilderState<T> extends State<GridBuilder<T>> {
       });
     }
 
-    // Fetch once
+    _isFetching = true;
     if (mounted) {
       setState(() {
         _isLoading = true;
@@ -119,7 +123,7 @@ class _GridBuilderState<T> extends State<GridBuilder<T>> {
     try {
       final query = widget.controller.state.toQuery();
       final page = await ds.fetch(query);
-      widget.controller.setData(page.data);
+      widget.controller.setDataWithPageCount(page.data, page.computedTotalPages);
       if (mounted) {
         setState(() => _isLoading = false);
       }
@@ -130,6 +134,8 @@ class _GridBuilderState<T> extends State<GridBuilder<T>> {
           _error = e.toString();
         });
       }
+    } finally {
+      _isFetching = false;
     }
   }
 

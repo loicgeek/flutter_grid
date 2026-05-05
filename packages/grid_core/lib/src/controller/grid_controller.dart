@@ -405,6 +405,15 @@ class GridController<T> {
     _notifyListeners();
   }
 
+  /// Sets data and updates [pageCount] in a single notification.
+  /// Use this from server-side datasources so the pagination widget
+  /// reflects the correct total pages.
+  void setDataWithPageCount(List<T> data, int pageCount) {
+    _data = data;
+    _state = _state.copyWith(pageCount: pageCount);
+    _notifyListeners();
+  }
+
   // --- Convenience dispatch methods ---
 
   void toggleSort(String columnId, {bool multi = false}) =>
