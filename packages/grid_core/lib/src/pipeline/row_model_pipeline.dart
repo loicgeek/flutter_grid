@@ -71,9 +71,8 @@ class RowModelPipeline<T> {
     }
 
     // Pinned rows (search across all possible rows if needed, or just top-level)
-    final topPinned = allRawRows
-        .where((r) => state.rowPinning.top.contains(r.id))
-        .toList();
+    final topPinned =
+        allRawRows.where((r) => state.rowPinning.top.contains(r.id)).toList();
     final bottomPinned = allRawRows
         .where((r) => state.rowPinning.bottom.contains(r.id))
         .toList();
@@ -88,12 +87,13 @@ class RowModelPipeline<T> {
     }
     // Assume keepPinnedRows is true by default unless specified otherwise by feature.
     // In RowPinningFeature, it defaults to true.
-    final keepPinnedRows = (rowPinningFeature as dynamic)?.keepPinnedRows ?? true;
-    
+    final keepPinnedRows =
+        (rowPinningFeature as dynamic)?.keepPinnedRows ?? true;
+
     if (!keepPinnedRows) {
       pageRows = pageRows.where((r) {
         return !state.rowPinning.top.contains(r.id) &&
-               !state.rowPinning.bottom.contains(r.id);
+            !state.rowPinning.bottom.contains(r.id);
       }).toList();
     }
 
@@ -114,14 +114,16 @@ class RowModelPipeline<T> {
     );
   }
 
-  List<RowModel<T>> _applyGrouping(List<T> data, List<ColumnDef<T, dynamic>> columns) {
+  List<RowModel<T>> _applyGrouping(
+      List<T> data, List<ColumnDef<T, dynamic>> columns) {
     final groupColId = state.grouping.first;
     final groupCol = columns.where((c) => c.id == groupColId).firstOrNull;
     if (groupCol?.accessorFn == null) return _toRowModels(data, depth: 0);
 
     final groups = <dynamic, List<T>>{};
     for (final row in data) {
-      final key = groupCol!.getGroupingValue?.call(row) ?? groupCol.accessorFn!(row);
+      final key =
+          groupCol!.getGroupingValue?.call(row) ?? groupCol.accessorFn!(row);
       groups[key] = [...(groups[key] ?? []), row];
     }
 
@@ -130,7 +132,7 @@ class RowModelPipeline<T> {
     for (final entry in groups.entries) {
       final subRows = _toRowModels(entry.value, depth: 1);
       final id = 'group:$groupColId:${entry.key}';
-      
+
       final groupRow = RowModel<T>(
         id: id,
         original: entry.value.first, // representative
@@ -143,7 +145,7 @@ class RowModelPipeline<T> {
         isExpanded: state.expanded[id] ?? false,
         controller: controller,
       );
-      
+
       result.add(groupRow);
 
       if (groupRow.isExpanded) {
@@ -160,7 +162,8 @@ class RowModelPipeline<T> {
     final result = <RowModel<T>>[];
     for (final row in rows) {
       result.add(row);
-      if (row.isExpanded && !row.isGrouped) { // Grouped rows already expanded above
+      if (row.isExpanded && !row.isGrouped) {
+        // Grouped rows already expanded above
         final subData = getSubRows!(row.original);
         if (subData.isNotEmpty) {
           final subRows = _toRowModels(subData, depth: row.depth + 1);
@@ -171,7 +174,8 @@ class RowModelPipeline<T> {
     return result;
   }
 
-  List<RowModel<T>> _toRowModels(List<T> data, {int startIndex = 0, int depth = 0}) {
+  List<RowModel<T>> _toRowModels(List<T> data,
+      {int startIndex = 0, int depth = 0}) {
     return data.indexed.map((entry) {
       final (i, row) = entry;
       final index = startIndex + i;

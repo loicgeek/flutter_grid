@@ -1118,7 +1118,7 @@ controller.executeOptimistic(
 
 ```dart
 controller.setData(List<T> data);
-controller.setDataWithPageCount(List<T> data, int pageCount); // server-side
+controller.setDataWithPageCountAndTotalItems(List<T> data, int pageCount, {int? totalItems}); // server-side
 controller.refresh();
 controller.dispose();
 ```

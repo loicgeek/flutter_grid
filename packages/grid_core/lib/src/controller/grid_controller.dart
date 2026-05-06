@@ -408,9 +408,10 @@ class GridController<T> {
   /// Sets data and updates [pageCount] in a single notification.
   /// Use this from server-side datasources so the pagination widget
   /// reflects the correct total pages.
-  void setDataWithPageCount(List<T> data, int pageCount) {
+  void setDataWithPageCountAndTotalItems(List<T> data, int pageCount,
+      {int? totalItems}) {
     _data = data;
-    _state = _state.copyWith(pageCount: pageCount);
+    _state = _state.copyWith(pageCount: pageCount, totalItems: totalItems);
     _notifyListeners();
   }
 

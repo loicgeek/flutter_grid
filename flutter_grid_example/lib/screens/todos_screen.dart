@@ -121,55 +121,53 @@ class _TodosScreenState extends State<TodosScreen> {
     return Scaffold(
       backgroundColor: _white,
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: ListView(
           children: [
             const _PageHeader(),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: _white,
-                    border: Border.all(color: _borderColor),
-                    borderRadius: BorderRadius.circular(10),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: _white,
+                  border: Border.all(color: _borderColor),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: GridTheme(
+                  data: GridThemeData(
+                    headerBackground: _surfaceGray,
+                    headerForeground: _textSecondary,
+                    headerTextStyle: const TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w600,
+                      color: _textSecondary,
+                      letterSpacing: 0.5,
+                    ),
+                    headerHeight: 44,
+                    rowHeight: 56,
+                    rowBackground: _white,
+                    alternateRowBackground: _white,
+                    hoverRowBackground: _brandHover,
+                    borderColor: _borderColor,
+                    borderWidth: 1,
+                    cellPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 8,
+                    ),
+                    headerPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
                   ),
-                  clipBehavior: Clip.antiAlias,
-                  child: GridTheme(
-                    data: GridThemeData(
-                      headerBackground: _surfaceGray,
-                      headerForeground: _textSecondary,
-                      headerTextStyle: const TextStyle(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w600,
-                        color: _textSecondary,
-                        letterSpacing: 0.5,
-                      ),
-                      headerHeight: 44,
-                      rowHeight: 56,
-                      rowBackground: _white,
-                      alternateRowBackground: _white,
-                      hoverRowBackground: _brandHover,
-                      borderColor: _borderColor,
-                      borderWidth: 1,
-                      cellPadding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 8,
-                      ),
-                      headerPadding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 12,
-                      ),
-                    ),
-                    child: FlutterGrid<Todo>(
-                      controller: _controller,
-                      dataSource: _dataSource,
-                      showToolbar: false,
-                      showFilterBar: false,
-                      showPagination: true,
-                      fillWidth: true,
-                      showColumnBorders: true,
-                    ),
+                  child: FlutterGrid<Todo>(
+                    controller: _controller,
+                    dataSource: _dataSource,
+                    showToolbar: false,
+                    showFilterBar: false,
+                    showPagination: true,
+                    shrinkWrap: true,
+                    fillWidth: true,
+                    showColumnBorders: true,
                   ),
                 ),
               ),

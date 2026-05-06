@@ -25,9 +25,16 @@ class PaginationState {
   final int pageIndex;
   final int pageSize;
 
-  const PaginationState({this.pageIndex = 0, this.pageSize = 10});
+  const PaginationState({
+    this.pageIndex = 0,
+    this.pageSize = 10,
+  });
 
-  PaginationState copyWith({int? pageIndex, int? pageSize}) => PaginationState(
+  PaginationState copyWith({
+    int? pageIndex,
+    int? pageSize,
+  }) =>
+      PaginationState(
         pageIndex: pageIndex ?? this.pageIndex,
         pageSize: pageSize ?? this.pageSize,
       );
@@ -77,6 +84,7 @@ class GridState {
   final PaginationState pagination;
   final bool manualPagination;
   final int? pageCount;
+  final int? totalItems;
   final Map<String, bool> rowSelection;
   final bool enableMultiRowSelection;
   final bool selectAllPages;
@@ -98,6 +106,7 @@ class GridState {
     this.pagination = const PaginationState(),
     this.manualPagination = false,
     this.pageCount,
+    this.totalItems,
     this.rowSelection = const {},
     this.enableMultiRowSelection = true,
     this.selectAllPages = false,
@@ -121,6 +130,7 @@ class GridState {
     PaginationState? pagination,
     bool? manualPagination,
     int? pageCount,
+    int? totalItems,
     Map<String, bool>? rowSelection,
     bool? enableMultiRowSelection,
     bool? selectAllPages,
@@ -144,6 +154,7 @@ class GridState {
       pagination: pagination ?? this.pagination,
       manualPagination: manualPagination ?? this.manualPagination,
       pageCount: pageCount ?? this.pageCount,
+      totalItems: totalItems ?? this.totalItems,
       rowSelection: rowSelection ?? this.rowSelection,
       enableMultiRowSelection:
           enableMultiRowSelection ?? this.enableMultiRowSelection,

@@ -123,7 +123,11 @@ class _GridBuilderState<T> extends State<GridBuilder<T>> {
     try {
       final query = widget.controller.state.toQuery();
       final page = await ds.fetch(query);
-      widget.controller.setDataWithPageCount(page.data, page.computedTotalPages);
+      widget.controller.setDataWithPageCountAndTotalItems(
+        page.data,
+        page.computedTotalPages,
+        totalItems: page.totalItems,
+      );
       if (mounted) {
         setState(() => _isLoading = false);
       }

@@ -1,6 +1,16 @@
 # Changelog
 
 All notable changes to `ntech_grid` are documented here.
+
+## 0.1.3 - 2026-05-06
+
+### Added
+
+#### grid_core
+- `GridController.setDataWithPageCountAndTotalItems` — sets data and updates [pageCount] in a single notification.
+- [grid_flutter] `GridBuilder.fetch` uses [setDataWithPageCountAndTotalItems]
+
+
 ## 0.1.2 - 2026-05-04
  
 ### Added
