@@ -21,8 +21,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  grid_core:
-    path: ../grid_core
+  grid_core: ^0.1.3
+  # grid_core:
+  #   path: pubspec.yamlgrid_core
 
 dev_dependencies:
   flutter_test:
