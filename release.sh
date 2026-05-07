@@ -12,9 +12,26 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
-VERSION=$1
+VERSION=""
+PUBLISH=false
+
+# Parse arguments
+for arg in "$@"; do
+  if [[ "$arg" == "--publish" ]]; then
+    PUBLISH=true
+  elif [[ "$arg" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-.*)?$ ]]; then
+    VERSION="$arg"
+  fi
+done
+
+if [ -z "$VERSION" ]; then
+  echo "Usage: ./release.sh <version> [--publish]"
+  echo "Example: ./release.sh 0.1.3"
+  echo "         ./release.sh 0.1.3 --publish"
+  exit 1
+fi
+
 DATE=$(date +%Y-%m-%d)
-PACKAGES=("packages/grid_core" "packages/grid_export" "packages/grid_flutter" "packages/grid_ui")
 
 # Cleanup function to restore files on exit or error
 cleanup() {
@@ -158,14 +175,43 @@ echo ""
 echo "================================================================"
 echo "✅ Preparation complete for version $VERSION!"
 echo "================================================================"
-echo "Next steps:"
-echo "1. Commit the changes: git commit -am \"chore: release $VERSION\""
-echo "2. Tag the release: git tag v$VERSION"
-echo "3. Push: git push origin main --tags"
-echo "4. Publish each sub-package in order:"
-echo "   (cd packages/grid_core && flutter pub publish)"
-echo "   (cd packages/grid_export && flutter pub publish)"
-echo "   (cd packages/grid_flutter && flutter pub publish)"
-echo "   (cd packages/grid_ui && flutter pub publish)"
-echo "5. Finally, publish the main package: flutter pub publish"
 
+if [ "$PUBLISH" = true ]; then
+  echo ""
+  echo "⚠️  WARNING: Starting ACTUAL publishing to pub.dev..."
+  echo "You will need to confirm each package in the terminal."
+  echo ""
+  
+  # 1. Sub-packages in order
+  for PKG in "${PACKAGES[@]}"; do
+    echo "📦 Publishing $PKG..."
+    pushd "$PKG" > /dev/null
+    flutter pub publish
+    popd > /dev/null
+    echo "✅ $PKG published."
+    echo ""
+  done
+  
+  # 2. Root package
+  echo "📦 Publishing root package ntech_grid..."
+  swap_dependencies "pubspec.yaml" "$VERSION"
+  flutter pub publish
+  # Cleanup will handle reverting the pubspec.yaml
+  echo "✅ ntech_grid published."
+  
+  echo ""
+  echo "🎉 ALL PACKAGES RELEASED SUCCESSFULLY!"
+else
+  echo "Next steps:"
+  echo "1. Commit the changes: git commit -am \"chore: release $VERSION\""
+  echo "2. Tag the release: git tag v$VERSION"
+  echo "3. Push: git push origin main --tags"
+  echo "4. Publish each sub-package in order:"
+  echo "   (cd packages/grid_core && flutter pub publish)"
+  echo "   (cd packages/grid_export && flutter pub publish)"
+  echo "   (cd packages/grid_flutter && flutter pub publish)"
+  echo "   (cd packages/grid_ui && flutter pub publish)"
+  echo "5. Finally, publish the main package: flutter pub publish"
+  echo ""
+  echo "💡 Tip: Run with --publish to automate these steps."
+fi
