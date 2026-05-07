@@ -61,6 +61,35 @@ class FlutterGrid<T> extends StatefulWidget {
   final void Function(RowModel<T>)? onRowDoubleTap;
   final void Function(RowModel<T>)? onRowLongPress;
 
+  // ── Fetch behaviour ────────────────────────────────────────────────────────
+
+  /// Controls when the loading state is shown.
+  ///
+  /// - [GridLoadingBehavior.always] *(default)* — the loading skeleton
+  ///   replaces the table on every fetch, including re-fetches while rows are
+  ///   already visible.
+  /// - [GridLoadingBehavior.whenEmpty] — the loading skeleton is shown only
+  ///   on the very first fetch. Subsequent fetches (page changes, filter
+  ///   changes…) keep the existing rows visible while new data loads, ideal
+  ///   for a subtle "refreshing" indicator rather than a full-screen spinner.
+  final GridLoadingBehavior loadingBehavior;
+
+  /// Called whenever [GridDataSource.fetch] throws.
+  ///
+  /// Receives the raw error object and its stack trace. Use this for
+  /// centralised logging, analytics, or a global snack-bar — the built-in
+  /// error state widget is still shown in the grid body.
+  final void Function(Object error, StackTrace stackTrace)? onError;
+
+  /// When `true` *(default)*, if a fetch fails and the page index has changed
+  /// since the last successful fetch, [FlutterGrid] automatically resets the
+  /// controller to the last known-good page and re-fetches it — the grid
+  /// self-heals without the user having to navigate back manually.
+  ///
+  /// Set to `false` to keep the controller on the failed page (e.g. if you
+  /// prefer to handle recovery yourself via [GridSlots.errorState]).
+  final bool revertPageOnError;
+
   const FlutterGrid({
     super.key,
     required this.controller,
@@ -81,6 +110,9 @@ class FlutterGrid<T> extends StatefulWidget {
     this.onRowTap,
     this.onRowDoubleTap,
     this.onRowLongPress,
+    this.loadingBehavior = GridLoadingBehavior.always,
+    this.onError,
+    this.revertPageOnError = true,
   });
 
   @override
@@ -104,9 +136,13 @@ class _FlutterGridState<T> extends State<FlutterGrid<T>> {
     return GridBuilder<T>(
       controller: widget.controller,
       dataSource: _dataSource,
+      loadingBehavior: widget.loadingBehavior,
+      onError: widget.onError,
+      revertPageOnError: widget.revertPageOnError,
       builder: (context, table) {
-        // Loading state (only when no data yet)
-        if (table.isLoading && table.pageRows.isEmpty) {
+        // Loading state — isLoading already accounts for loadingBehavior, so
+        // this only triggers when the builder wants a full loading skeleton.
+        if (table.isLoading && !table.hasData) {
           return widget.slots?.loadingState?.call(context) ??
               GridLoadingState(columns: widget.controller.options.flatColumns);
         }
