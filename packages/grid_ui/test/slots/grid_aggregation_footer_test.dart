@@ -31,10 +31,11 @@ void main() {
     // Total sum should be 1 + 2 + 3 = 6
     controller.setData([1, 2, 3]);
 
+    final rowSet = controller.getRowModels();
     final tableState = GridTableState<int>(
       controller: controller,
       state: controller.state,
-      rowModelSet: controller.getRowModels(),
+      rowModelSet: rowSet,
       allColumns: controller.getAllColumns(),
       visibleColumns: controller.getVisibleColumns(),
       leftPinnedColumns: controller.getLeftPinnedColumns(),
@@ -42,6 +43,8 @@ void main() {
       rightPinnedColumns: controller.getRightPinnedColumns(),
       headerGroups: const [],
       isLoading: false,
+      hasData: rowSet.pageRows.isNotEmpty,
+      retry: () {},
     );
 
     await tester.pumpWidget(

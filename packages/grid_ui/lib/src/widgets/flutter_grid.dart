@@ -114,10 +114,10 @@ class _FlutterGridState<T> extends State<FlutterGrid<T>> {
         // Error state (only when no data to show)
         if (table.error != null && table.pageRows.isEmpty) {
           return widget.slots?.errorState
-                  ?.call(context, table.error!, widget.controller.refresh) ??
+                  ?.call(context, table.error!, table.retry) ??
               GridErrorState(
-                error: table.error!,
-                onRetry: widget.controller.refresh,
+                error: table.errorMessage!,
+                onRetry: table.retry,
               );
         }
 

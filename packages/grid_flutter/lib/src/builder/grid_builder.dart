@@ -3,6 +3,30 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:grid_core/grid_core.dart';
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Loading behaviour
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Controls when [GridTableState.isLoading] is set to `true`.
+enum GridLoadingBehavior {
+  /// `isLoading` is `true` for **every** fetch, regardless of whether the
+  /// table already holds rows. Use this when your builder completely replaces
+  /// the table content with a spinner while new data loads. (default)
+  always,
+
+  /// `isLoading` is `true` **only** on the very first fetch, while no rows
+  /// have been received yet. Once the table has data, subsequent fetches
+  /// (page changes, filter changes, …) keep `isLoading = false` so the
+  /// builder can continue to render the existing rows in the background while
+  /// new data arrives — ideal for a subtle "refreshing" overlay instead of a
+  /// full-screen spinner.
+  whenEmpty,
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GridTableState
+// ─────────────────────────────────────────────────────────────────────────────
+
 /// The state exposed to [GridBuilder]'s builder callback.
 class GridTableState<T> {
   final GridController<T> controller;
@@ -14,8 +38,45 @@ class GridTableState<T> {
   final List<ColumnInfo<T, Object?>> centerColumns;
   final List<ColumnInfo<T, Object?>> rightPinnedColumns;
   final List<HeaderGroup<T>> headerGroups;
+
+  /// Whether a fetch is currently in flight.
+  ///
+  /// The exact semantics depend on [GridBuilder.loadingBehavior]:
+  /// - [GridLoadingBehavior.always] — `true` for every fetch.
+  /// - [GridLoadingBehavior.whenEmpty] — `true` only when [hasData] is `false`.
   final bool isLoading;
-  final String? error;
+
+  /// `true` when [pageRows] contains at least one row from a previous fetch.
+  ///
+  /// Useful together with [isLoading] to decide between a full-screen spinner
+  /// (first load) and a lightweight refresh indicator (subsequent loads):
+  /// ```dart
+  /// if (table.isLoading && !table.hasData) return const FullscreenSpinner();
+  /// if (table.isLoading) return const RefreshBanner();
+  /// ```
+  final bool hasData;
+
+  /// The raw error thrown by the last failed [GridDataSource.fetch] call,
+  /// or `null` if the last fetch succeeded.
+  ///
+  /// Cast to the concrete type your data source throws, or call
+  /// [errorMessage] for a plain string:
+  /// ```dart
+  /// if (table.error is DioException) { … }
+  /// ```
+  final Object? error;
+
+  /// The [StackTrace] associated with [error], or `null`.
+  final StackTrace? errorStackTrace;
+
+  /// Re-issues the last fetch without changing any controller state.
+  ///
+  /// Typically wired to a "Retry" button shown when [error] is non-null:
+  /// ```dart
+  /// if (table.error != null)
+  ///   ElevatedButton(onPressed: table.retry, child: const Text('Retry')),
+  /// ```
+  final VoidCallback retry;
 
   const GridTableState({
     required this.controller,
@@ -28,7 +89,10 @@ class GridTableState<T> {
     required this.rightPinnedColumns,
     required this.headerGroups,
     required this.isLoading,
+    required this.hasData,
+    required this.retry,
     this.error,
+    this.errorStackTrace,
   }) : _rowModelSet = rowModelSet;
 
   List<RowModel<T>> get pageRows => _rowModelSet.pageRows;
@@ -38,7 +102,15 @@ class GridTableState<T> {
   List<RowModel<T>> get bottomPinnedRows => _rowModelSet.bottomPinnedRows;
   int get totalRows => _rowModelSet.totalRows;
   int get totalPages => _rowModelSet.totalPages;
+
+  /// Convenience getter — `error?.toString()` — for builders that only need
+  /// a human-readable string.
+  String? get errorMessage => error?.toString();
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GridBuilder
+// ─────────────────────────────────────────────────────────────────────────────
 
 /// Connects a [GridController] (and optionally a [GridDataSource]) to the
 /// widget tree, rebuilding whenever the controller notifies.
@@ -61,18 +133,44 @@ class GridTableState<T> {
 /// - The **last issued** fetch always wins — stale responses never overwrite
 ///   newer data.
 ///
-/// This replaces the old `_isFetching` guard that used to silently drop
-/// state changes that arrived while a fetch was in progress.
+/// ### Page revert on error
+///
+/// When [revertPageOnError] is `true` (the default) and a fetch fails,
+/// [GridBuilder] automatically calls [GridController.setPageIndex] with the
+/// page index of the last *successful* fetch. This prevents the controller
+/// from being left on a page that has no loaded data. The revert triggers a
+/// new fetch for the previous page, so the table recovers automatically.
 class GridBuilder<T> extends StatefulWidget {
   final GridController<T> controller;
   final GridDataSource<T>? dataSource;
   final Widget Function(BuildContext context, GridTableState<T> table) builder;
+
+  /// Controls when [GridTableState.isLoading] is set to `true`.
+  /// Defaults to [GridLoadingBehavior.always].
+  final GridLoadingBehavior loadingBehavior;
+
+  /// Called whenever [GridDataSource.fetch] throws.
+  ///
+  /// Receives the raw error and its stack trace. Use this for logging,
+  /// analytics, or showing a global snackbar. The builder still receives
+  /// [GridTableState.error] for inline error UI.
+  final void Function(Object error, StackTrace stackTrace)? onError;
+
+  /// When `true` (the default), if a fetch fails [GridBuilder] resets the
+  /// controller's page index back to the last successfully loaded page.
+  ///
+  /// This prevents the grid from being visually stuck on a page with no data.
+  /// The revert triggers a new fetch automatically.
+  final bool revertPageOnError;
 
   const GridBuilder({
     super.key,
     required this.controller,
     this.dataSource,
     required this.builder,
+    this.loadingBehavior = GridLoadingBehavior.always,
+    this.onError,
+    this.revertPageOnError = true,
   });
 
   @override
@@ -95,8 +193,20 @@ class _GridBuilderState<T> extends State<GridBuilder<T>> {
   bool _settingData = false;
 
   bool _isLoading = false;
-  String? _error;
+  Object? _error;
+  StackTrace? _errorStackTrace;
   StreamSubscription<List<T>>? _watchSub;
+
+  /// Set to `true` after the first successful fetch completes.
+  ///
+  /// Used by [GridLoadingBehavior.whenEmpty]: once any data has been received,
+  /// subsequent fetches should not re-raise the full loading indicator even if
+  /// the current filtered/paged view happens to be empty.
+  bool _hasReceivedData = false;
+
+  /// Page index of the last *successfully* completed fetch.
+  /// Used to revert the controller page on error.
+  int? _lastSuccessfulPageIndex;
 
   @override
   void initState() {
@@ -161,6 +271,7 @@ class _GridBuilderState<T> extends State<GridBuilder<T>> {
       setState(() {
         _isLoading = true;
         _error = null;
+        _errorStackTrace = null;
       });
     }
 
@@ -182,15 +293,37 @@ class _GridBuilderState<T> extends State<GridBuilder<T>> {
       );
       _settingData = false;
 
+      _hasReceivedData = true;
+      _lastSuccessfulPageIndex = query.pageIndex;
+
       if (mounted) setState(() => _isLoading = false);
-    } catch (e) {
+    } catch (e, st) {
       // Discard errors from stale fetches too.
       if (epoch != _epoch) return;
+
+      // ── Page revert ─────────────────────────────────────────────────────
+      // If the failed fetch was triggered by a page navigation (the current
+      // page differs from the last page that successfully loaded), reset the
+      // controller to that known-good page. The reset triggers a new fetch
+      // automatically — the table self-heals without user intervention.
+      final lastGoodPage = _lastSuccessfulPageIndex;
+      final failedPage = widget.controller.state.pagination.pageIndex;
+      if (widget.revertPageOnError &&
+          lastGoodPage != null &&
+          failedPage != lastGoodPage) {
+        widget.controller.setPageIndex(lastGoodPage);
+        // setPageIndex notifies listeners → _onControllerChanged → _fetch().
+        // The new fetch will clear the error when it succeeds.
+      }
+
+      // ── onError callback ────────────────────────────────────────────────
+      widget.onError?.call(e, st);
 
       if (mounted) {
         setState(() {
           _isLoading = false;
-          _error = e.toString();
+          _error = e;
+          _errorStackTrace = st;
         });
       }
     }
@@ -202,6 +335,17 @@ class _GridBuilderState<T> extends State<GridBuilder<T>> {
     final c = widget.controller;
     final rowSet = c.getRowModels();
     final allCols = c.getAllColumns();
+    final hasData = rowSet.pageRows.isNotEmpty;
+
+    // Honour loadingBehavior: once any data has been successfully received,
+    // suppress the loading flag for subsequent fetches in whenEmpty mode.
+    // We use _hasReceivedData rather than hasData because applying a filter
+    // can make the current local view appear empty even though the controller
+    // still holds rows from the previous fetch.
+    final effectiveIsLoading = _isLoading &&
+        (widget.loadingBehavior == GridLoadingBehavior.always ||
+            !_hasReceivedData);
+
     return GridTableState<T>(
       controller: c,
       state: c.state,
@@ -212,8 +356,11 @@ class _GridBuilderState<T> extends State<GridBuilder<T>> {
       centerColumns: c.getCenterColumns(),
       rightPinnedColumns: c.getRightPinnedColumns(),
       headerGroups: c.getHeaderGroups(),
-      isLoading: _isLoading,
+      isLoading: effectiveIsLoading,
+      hasData: hasData,
       error: _error,
+      errorStackTrace: _errorStackTrace,
+      retry: _fetch,
     );
   }
 

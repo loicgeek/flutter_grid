@@ -39,6 +39,8 @@ GridTableState<_Item> _buildTableState(GridController<_Item> c) {
     rightPinnedColumns: c.getRightPinnedColumns(),
     headerGroups: c.getHeaderGroups(),
     isLoading: false,
+    hasData: rowSet.pageRows.isNotEmpty,
+    retry: () {},
   );
 }
 

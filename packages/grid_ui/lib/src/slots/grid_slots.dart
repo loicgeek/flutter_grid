@@ -14,7 +14,7 @@ class GridEmptyContext {
 /// Slot callbacks for customizing grid UI sections.
 class GridSlots<T> {
   final Widget Function(BuildContext)? loadingState;
-  final Widget Function(BuildContext, String error, VoidCallback onRetry)?
+  final Widget Function(BuildContext, Object error, VoidCallback onRetry)?
       errorState;
   final Widget Function(BuildContext, GridEmptyContext)? emptyState;
   final Widget Function(BuildContext, GridTableState<T>)? toolbar;
