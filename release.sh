@@ -56,6 +56,30 @@ echo "📝 Committing version and changelog changes..."
 git add .
 git commit -m "chore: release $VERSION" --allow-empty
 
+# Function to swap path dependencies to versioned ones
+swap_dependencies() {
+  local FILE=$1
+  local TARGET_VERSION=$2
+  
+  # Backup
+  cp "$FILE" "$FILE.bak"
+  
+  # For each possible internal dependency
+  for DEP in "grid_core" "grid_flutter" "grid_ui"; do
+    if grep -q "$DEP:" "$FILE"; then
+      # Case A: Commented version already exists (like in root pubspec)
+      if grep -q "  # $DEP: \^" "$FILE"; then
+         perl -i -pe "s/^  # $DEP: \^.*/  $DEP: ^$TARGET_VERSION/" "$FILE"
+         perl -i -pe "BEGIN{undef $/;} s/^  $DEP:\n    path: (..\/|packages\/)$DEP/  # $DEP:\n    # path: $1$DEP/mg" "$FILE"
+      else
+         # Case B: No commented version, just swap the path one
+         # This handles the multi-line path dependency
+         perl -i -pe "BEGIN{undef $/;} s/^  $DEP:\n    path: (..\/|packages\/)$DEP/  $DEP: ^$TARGET_VERSION\n  # $DEP:\n  #   path: $1$DEP/mg" "$FILE"
+      fi
+    fi
+  done
+}
+
 # 5. Validate sub-packages (dry-run)
 PACKAGES=("packages/grid_core" "packages/grid_export" "packages/grid_flutter" "packages/grid_ui")
 
@@ -65,29 +89,40 @@ for PKG in "${PACKAGES[@]}"; do
   echo "📦 Checking $PKG..."
   echo "----------------------------------------------------------------"
   pushd "$PKG" > /dev/null
+  
+  # Swap dependencies if needed (e.g. grid_export depends on grid_core)
+  if [ "$PKG" != "packages/grid_core" ]; then
+    swap_dependencies "pubspec.yaml" "$VERSION"
+    # Also handle pubspec_overrides.yaml if it exists - it can cause issues with dry-run
+    if [ -f "pubspec_overrides.yaml" ]; then
+      mv "pubspec_overrides.yaml" "pubspec_overrides.yaml.bak"
+    fi
+  fi
+
   flutter pub get > /dev/null
-  # We use --no-codesign for macOS if needed, but for pub it shouldn't matter
   flutter pub publish --dry-run
+  
+  # Revert swap
+  if [ "$PKG" != "packages/grid_core" ]; then
+    mv "pubspec.yaml.bak" "pubspec.yaml"
+    if [ -f "pubspec_overrides.yaml.bak" ]; then
+      mv "pubspec_overrides.yaml.bak" "pubspec_overrides.yaml"
+    fi
+  fi
+  
   popd > /dev/null
 done
 
-# 5. Handle root package (ntech_grid)
+# 6. Handle root package (ntech_grid)
 echo ""
 echo "----------------------------------------------------------------"
 echo "📦 Preparing root package ntech_grid..."
 echo "----------------------------------------------------------------"
 
-# Backup pubspec.yaml
-cp pubspec.yaml pubspec.yaml.bak
-
-# Step A: Uncomment the versioned dependencies and set them to the new version
-perl -i -pe "s/^  # (grid_core|grid_flutter|grid_ui): \^.*/  \$1: ^$VERSION/" pubspec.yaml
-
-# Step B: Comment out the path dependencies
-perl -i -pe 'BEGIN{undef $/;} s/^  (grid_core|grid_flutter|grid_ui):\n    path: packages\/\1/  # $1:\n    # path: packages\/$1/mg' pubspec.yaml
+swap_dependencies "pubspec.yaml" "$VERSION"
 
 echo "🔍 Root pubspec.yaml modified for publishing (preview of dependencies):"
-grep -A 10 "dependencies:" pubspec.yaml
+grep -E "^  (grid_core|grid_flutter|grid_ui):" pubspec.yaml || grep -A 5 "dependencies:" pubspec.yaml | grep "grid_"
 
 echo "Running dry-run for root package..."
 flutter pub get > /dev/null
@@ -95,8 +130,9 @@ flutter pub publish --dry-run
 
 echo ""
 echo "⏪ Reverting root pubspec.yaml changes..."
-mv pubspec.yaml.bak pubspec.yaml
+mv pubspec.yaml.bak "pubspec.yaml"
 flutter pub get > /dev/null
+
 
 echo ""
 echo "================================================================"
