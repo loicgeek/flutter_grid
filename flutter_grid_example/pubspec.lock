@@ -158,28 +158,28 @@ packages:
       path: "../packages/grid_core"
       relative: true
     source: path
-    version: "0.1.0"
+    version: "0.1.4"
   grid_export:
     dependency: "direct main"
     description:
       path: "../packages/grid_export"
       relative: true
     source: path
-    version: "0.1.0"
+    version: "0.1.4"
   grid_flutter:
     dependency: transitive
     description:
       path: "../packages/grid_flutter"
       relative: true
     source: path
-    version: "0.1.0"
+    version: "0.1.4"
   grid_ui:
     dependency: transitive
     description:
       path: "../packages/grid_ui"
       relative: true
     source: path
-    version: "0.1.0"
+    version: "0.1.4"
   hooks:
     dependency: transitive
     description:
@@ -306,7 +306,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.1.0"
+    version: "0.1.4"
   objective_c:
     dependency: transitive
     description:

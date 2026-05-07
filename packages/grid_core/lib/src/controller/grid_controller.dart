@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import '../commands/grid_command.dart';
+import '../models/external_filter.dart';
 import '../middleware/grid_middleware.dart';
 import '../models/column_def.dart';
 import '../models/grid_state.dart';
@@ -235,6 +236,20 @@ class GridController<T> {
       StartEditingCellCommand c => state.copyWith(editingCellId: c.cellId),
       CommitEditCommand _ => state.copyWith(clearEditingCell: true),
       CancelEditCommand _ => state.copyWith(clearEditingCell: true),
+
+      // External filters — reset page to 0 on every change
+      SetExternalFilterCommand c => state.copyWith(
+          externalFilters: {...state.externalFilters, c.field: c.filter},
+          pagination: state.pagination.copyWith(pageIndex: 0),
+        ),
+      ClearExternalFilterCommand c => state.copyWith(
+          externalFilters: Map.from(state.externalFilters)..remove(c.field),
+          pagination: state.pagination.copyWith(pageIndex: 0),
+        ),
+      SetAllExternalFiltersCommand c => state.copyWith(
+          externalFilters: c.filters,
+          pagination: state.pagination.copyWith(pageIndex: 0),
+        ),
     };
   }
 
@@ -507,6 +522,70 @@ class GridController<T> {
 
   void setGrouping(List<String> grouping) =>
       dispatch(SetGroupingCommand(grouping));
+
+  // ---------------------------------------------------------------------------
+  // External filters
+  // ---------------------------------------------------------------------------
+
+  /// Sets (or replaces) a single external filter.
+  ///
+  /// ```dart
+  /// // From a DatePicker:
+  /// controller.setExternalFilter(
+  ///   'createdAt',
+  ///   ExternalFilter.gte(pickedDate),
+  /// );
+  ///
+  /// // Date range:
+  /// controller.setExternalFilter(
+  ///   'createdAt',
+  ///   ExternalFilter.dateRange(from: startDate, to: endDate),
+  /// );
+  ///
+  /// // Status multi-select:
+  /// controller.setExternalFilter(
+  ///   'status',
+  ///   ExternalFilter.inList(['active', 'pending']),
+  /// );
+  /// ```
+  void setExternalFilter(String field, ExternalFilter filter) =>
+      dispatch(SetExternalFilterCommand(field, filter));
+
+  /// Convenience overload that lets you specify operator inline.
+  ///
+  /// ```dart
+  /// controller.setExternalFilterValue(
+  ///   'amount',
+  ///   1000,
+  ///   operator: FilterOperator.gte,
+  /// );
+  /// ```
+  void setExternalFilterValue(
+    String field,
+    dynamic value, {
+    FilterOperator operator = FilterOperator.eq,
+  }) =>
+      dispatch(SetExternalFilterCommand(
+        field,
+        ExternalFilter(value: value, operator: operator),
+      ));
+
+  /// Removes a single external filter.
+  void clearExternalFilter(String field) =>
+      dispatch(ClearExternalFilterCommand(field));
+
+  /// Replaces all external filters at once.
+  ///
+  /// Pass an empty map to clear everything:
+  /// ```dart
+  /// controller.setExternalFilters({});
+  /// ```
+  void setExternalFilters(Map<String, ExternalFilter> filters) =>
+      dispatch(SetAllExternalFiltersCommand(filters));
+
+  /// Clears all external filters.
+  void clearAllExternalFilters() =>
+      dispatch(const SetAllExternalFiltersCommand({}));
 
   void startEditingCell(String cellId) =>
       dispatch(StartEditingCellCommand(cellId));

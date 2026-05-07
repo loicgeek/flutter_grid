@@ -1,3 +1,4 @@
+import 'external_filter.dart';
 import 'grid_query.dart';
 
 class SortEntry {
@@ -97,6 +98,15 @@ class GridState {
   final List<String> grouping;
   final String? editingCellId;
 
+  /// Filters set externally (e.g. from a date-picker or filter form outside
+  /// the grid widget). They are passed to every [GridDataSource.fetch] call
+  /// and are not affected by [ClearAllFiltersCommand] — clear them explicitly
+  /// with [ClearExternalFiltersCommand] or [ClearAllExternalFiltersCommand].
+  ///
+  /// Key = API field name (e.g. `'createdAt'`).
+  /// Value = typed filter with operator (e.g. `ExternalFilter.gte(date)`).
+  final Map<String, ExternalFilter> externalFilters;
+
   const GridState({
     this.sorting = const [],
     this.manualSorting = false,
@@ -118,6 +128,7 @@ class GridState {
     this.rowPinning = const RowPinningState(),
     this.grouping = const [],
     this.editingCellId,
+    this.externalFilters = const {},
   });
 
   GridState copyWith({
@@ -143,6 +154,8 @@ class GridState {
     List<String>? grouping,
     String? editingCellId,
     bool clearEditingCell = false,
+    Map<String, ExternalFilter>? externalFilters,
+    bool clearExternalFilters = false,
   }) {
     return GridState(
       sorting: sorting ?? this.sorting,
@@ -168,6 +181,9 @@ class GridState {
       grouping: grouping ?? this.grouping,
       editingCellId:
           clearEditingCell ? null : (editingCellId ?? this.editingCellId),
+      externalFilters: clearExternalFilters
+          ? const {}
+          : (externalFilters ?? this.externalFilters),
     );
   }
 

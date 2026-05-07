@@ -1,3 +1,4 @@
+import '../models/external_filter.dart';
 import '../models/grid_state.dart';
 
 // All command classes must be in the same library as the sealed class.
@@ -415,4 +416,60 @@ class CancelEditCommand extends GridCommand {
   @override
   GridCommand withPrevState(GridState state) =>
       CancelEditCommand(prevState: state);
+}
+
+// ---------------------------------------------------------------------------
+// External filter commands
+// ---------------------------------------------------------------------------
+
+/// Sets (or replaces) a single external filter for [field].
+///
+/// ```dart
+/// controller.setExternalFilter(
+///   'createdAt',
+///   ExternalFilter.gte(DateTime(2024)),
+/// );
+/// ```
+class SetExternalFilterCommand extends GridCommand {
+  final String field;
+  final ExternalFilter filter;
+  @override
+  final GridState? prevState;
+
+  const SetExternalFilterCommand(this.field, this.filter, {this.prevState});
+
+  @override
+  GridCommand withPrevState(GridState state) =>
+      SetExternalFilterCommand(field, filter, prevState: state);
+}
+
+/// Removes a single external filter by [field].
+class ClearExternalFilterCommand extends GridCommand {
+  final String field;
+  @override
+  final GridState? prevState;
+
+  const ClearExternalFilterCommand(this.field, {this.prevState});
+
+  @override
+  GridCommand withPrevState(GridState state) =>
+      ClearExternalFilterCommand(field, prevState: state);
+}
+
+/// Replaces **all** external filters at once.
+///
+/// Pass an empty map to clear everything:
+/// ```dart
+/// controller.dispatch(const SetAllExternalFiltersCommand({}));
+/// ```
+class SetAllExternalFiltersCommand extends GridCommand {
+  final Map<String, ExternalFilter> filters;
+  @override
+  final GridState? prevState;
+
+  const SetAllExternalFiltersCommand(this.filters, {this.prevState});
+
+  @override
+  GridCommand withPrevState(GridState state) =>
+      SetAllExternalFiltersCommand(filters, prevState: state);
 }

@@ -15,22 +15,23 @@ Sorting, filtering, pagination, grouping, selection, pinning, editing — all co
 6. [Data sources](#data-sources)
 7. [Sorting](#sorting)
 8. [Filtering](#filtering)
-9. [Pagination](#pagination)
-10. [Row selection](#row-selection)
-11. [Column management](#column-management)
-12. [Row pinning](#row-pinning)
-13. [Grouping & aggregation](#grouping--aggregation)
-14. [Expanding rows](#expanding-rows)
-15. [Cell renderers](#cell-renderers)
-16. [Custom theme](#custom-theme)
-17. [Slots — customise any UI section](#slots--customise-any-ui-section)
-18. [Low-level: GridBuilder](#low-level-gridbuildert)
-19. [Embedded / shrink-wrap mode](#embedded--shrink-wrap-mode)
-20. [Mobile layout](#mobile-layout)
-21. [CSV export](#csv-export-grid_export)
-22. [Middleware](#middleware)
-23. [FlutterGrid parameter reference](#fluttergrid-parameter-reference)
-24. [GridController API reference](#gridcontroller-api-reference)
+9. [External filters](#external-filters)
+10. [Pagination](#pagination)
+11. [Row selection](#row-selection)
+12. [Column management](#column-management)
+13. [Row pinning](#row-pinning)
+14. [Grouping & aggregation](#grouping--aggregation)
+15. [Expanding rows](#expanding-rows)
+16. [Cell renderers](#cell-renderers)
+17. [Custom theme](#custom-theme)
+18. [Slots — customise any UI section](#slots--customise-any-ui-section)
+19. [Low-level: GridBuilder](#low-level-gridbuildert)
+20. [Embedded / shrink-wrap mode](#embedded--shrink-wrap-mode)
+21. [Mobile layout](#mobile-layout)
+22. [CSV export](#csv-export-grid_export)
+23. [Middleware](#middleware)
+24. [FlutterGrid parameter reference](#fluttergrid-parameter-reference)
+25. [GridController API reference](#gridcontroller-api-reference)
 
 ---
 
@@ -423,11 +424,13 @@ FlutterGrid<Message>(
 | `globalFilter` | `String?` | Search box text |
 | `columnFilters` | `Map<String, dynamic>` | Per-column filter values |
 | `grouping` | `List<String>` | Active grouping column IDs |
+| `externalFilters` | `Map<String, ExternalFilter>` | Typed filters set programmatically (date pickers, form fields, etc.) |
 
 ```dart
 // Convert to standard HTTP params
 final params = query.toQueryParameters();
-// → {'page': '1', 'pageSize': '10', 'sort': '-name', 'q': 'flutter'}
+// → {'page': '1', 'pageSize': '10', 'sort': '-name', 'q': 'flutter',
+//    'filter[createdAt][gte]': '2024-01-01T00:00:00.000Z'}
 ```
 
 ---
@@ -501,6 +504,170 @@ ColumnDef<Order, double>.accessor(
 // Apply:
 controller.setColumnFilter('amount', {'min': 100.0, 'max': 500.0});
 ```
+
+---
+
+## External filters
+
+**External filters** let you control query parameters from widgets that live *outside* the grid — date pickers, status toggles, form fields, URL query strings, etc.
+
+They differ from `columnFilters` (which are tied to a column's built-in UI) in two key ways:
+
+- They carry a typed **operator** (`eq`, `gte`, `lte`, `in_`, `between`, …) that is serialised directly into `GridQuery.toQueryParameters()`.
+- They are **not cleared** by `clearAllFilters()` — they are independently managed by the caller.
+
+Every change resets the page to 0 and triggers a data source refetch automatically.
+
+### Quick example
+
+```dart
+// Date picker outside the grid
+onDateRangeSelected: (start, end) {
+  controller.setExternalFilter(
+    'createdAt',
+    ExternalFilter.dateRange(from: start, to: end),
+  );
+  // → filter[createdAt][gte]=2024-01-01T…&filter[createdAt][lte]=2024-03-31T…
+},
+
+// Status chip toggle
+onStatusSelected: (String? status) {
+  if (status == null) {
+    controller.clearExternalFilter('status');
+  } else {
+    controller.setExternalFilter('status', ExternalFilter.eq(status));
+    // → filter[status][eq]=active
+  }
+},
+
+// Multi-select (e.g. checkbox list)
+controller.setExternalFilter(
+  'status',
+  ExternalFilter.inList(['active', 'pending']),
+  // → filter[status][in]=active,pending
+);
+
+// Numeric minimum
+controller.setExternalFilterValue(
+  'amount',
+  1000,
+  operator: FilterOperator.gte,
+  // → filter[amount][gte]=1000
+);
+
+// Clear one filter
+controller.clearExternalFilter('createdAt');
+
+// Replace all external filters at once (e.g. from URL params on mount)
+controller.setExternalFilters({
+  'status': ExternalFilter.eq('active'),
+  'region': ExternalFilter.inList(['EU', 'US']),
+});
+
+// Clear everything
+controller.clearAllExternalFilters();
+```
+
+### Accessing them in your data source
+
+`query.externalFilters` is available inside `fetch()` — you can read the typed values directly instead of (or in addition to) using `toQueryParameters()`:
+
+```dart
+class OrdersDataSource extends GridDataSource<Order> {
+  @override
+  Future<GridPage<Order>> fetch(GridQuery query) async {
+    // Option A — let toQueryParameters() serialise everything automatically
+    final params = query.toQueryParameters();
+    // params already contains filter[status][eq]=active, filter[amount][gte]=1000, etc.
+    final res = await dio.get('/orders', queryParameters: params);
+    ...
+
+    // Option B — read typed values and build your own URL / Supabase query
+    final statusFilter = query.externalFilters['status'];
+    final dateFilter   = query.externalFilters['createdAt'];
+
+    var q = supabase.from('orders').select();
+
+    if (statusFilter != null && statusFilter.operator == FilterOperator.eq) {
+      q = q.eq('status', statusFilter.value as String);
+    }
+
+    if (dateFilter != null && dateFilter.operator == FilterOperator.between) {
+      final bounds = dateFilter.value as List;
+      if (bounds[0] != null) q = q.gte('created_at', bounds[0]);
+      if (bounds[1] != null) q = q.lte('created_at', bounds[1]);
+    }
+
+    final data = await q
+        .range(query.pageIndex * query.pageSize, (query.pageIndex + 1) * query.pageSize - 1);
+    ...
+  }
+}
+```
+
+### `FilterOperator` reference
+
+| Operator | Serialised key | Notes |
+|---|---|---|
+| `eq` | `filter[field][eq]=value` | Exact match |
+| `neq` | `filter[field][neq]=value` | Not equal |
+| `gt` | `filter[field][gt]=value` | Strictly greater than |
+| `gte` | `filter[field][gte]=value` | Greater than or equal |
+| `lt` | `filter[field][lt]=value` | Strictly less than |
+| `lte` | `filter[field][lte]=value` | Less than or equal |
+| `contains` | `filter[field][contains]=value` | Case-insensitive substring |
+| `startsWith` | `filter[field][startsWith]=value` | |
+| `endsWith` | `filter[field][endsWith]=value` | |
+| `in_` | `filter[field][in]=a,b,c` | Value is a `List` |
+| `notIn` | `filter[field][notIn]=a,b,c` | Value is a `List` |
+| `between` | `filter[field][gte]=a&filter[field][lte]=b` | Two-element `List`; expands into two params |
+| `isNull` | `filter[field][isNull]=true` | |
+| `isNotNull` | `filter[field][isNotNull]=true` | |
+
+### `ExternalFilter` named constructors
+
+```dart
+ExternalFilter.eq(value)
+ExternalFilter.gte(value)
+ExternalFilter.gt(value)
+ExternalFilter.lte(value)
+ExternalFilter.lt(value)
+ExternalFilter.contains(String value)
+ExternalFilter.inList(List values)
+ExternalFilter.isNull()
+ExternalFilter.isNotNull()
+ExternalFilter.dateRange({DateTime? from, DateTime? to})   // → between
+ExternalFilter.range(num? min, num? max)                   // → between
+```
+
+### Query parameter format
+
+By default keys use bracket notation (`filter[field][op]=value`). You can change the format per-query if your API expects a different style:
+
+```dart
+// In your data source:
+@override
+Future<GridPage<T>> fetch(GridQuery query) async {
+  // Dot notation: filter.field.op=value
+  final params = query.toQueryParameters(/* format already set on GridQuery */);
+
+  // Or override the format before serialising:
+  final dotParams = query
+      .copyWith(paramFormat: QueryParamFormat.dotNotation)
+      .toQueryParameters();
+
+  // Bare: field[op]=value  (no "filter" prefix)
+  final bareParams = query
+      .copyWith(paramFormat: QueryParamFormat.bare)
+      .toQueryParameters();
+}
+```
+
+| `QueryParamFormat` | Key format |
+|---|---|
+| `brackets` (default) | `filter[field][op]=value` |
+| `dotNotation` | `filter.field.op=value` |
+| `bare` | `field[op]=value` |
 
 ---
 
@@ -1137,7 +1304,31 @@ controller.resetSort();
 controller.setGlobalFilter('query');
 controller.setColumnFilter('status', 'active');
 controller.removeColumnFilter('status');
-controller.clearAllFilters();
+controller.clearAllFilters();   // does NOT clear external filters
+```
+
+### External filters
+
+```dart
+// Set a single filter with a named constructor
+controller.setExternalFilter('createdAt', ExternalFilter.gte(DateTime(2024)));
+controller.setExternalFilter('status',    ExternalFilter.inList(['active', 'pending']));
+controller.setExternalFilter('createdAt', ExternalFilter.dateRange(from: start, to: end));
+
+// Inline value + operator
+controller.setExternalFilterValue('amount', 1000, operator: FilterOperator.gte);
+
+// Clear one
+controller.clearExternalFilter('createdAt');
+
+// Replace all at once
+controller.setExternalFilters({
+  'status': ExternalFilter.eq('active'),
+  'region': ExternalFilter.inList(['EU', 'US']),
+});
+
+// Clear all external filters
+controller.clearAllExternalFilters();
 ```
 
 ### Pagination
@@ -1209,10 +1400,12 @@ state.hasSelection           // bool
 state.selectedCount          // int
 state.rowSelection           // Map<String, bool>
 state.grouping               // List<String>
+state.externalFilters        // Map<String, ExternalFilter>
 
 // Convert to HTTP parameters for server-side queries
 state.toQuery().toQueryParameters()
-// → {'page': '1', 'pageSize': '10', 'sort': '-name', 'q': 'flutter'}
+// → {'page': '1', 'pageSize': '10', 'sort': '-name', 'q': 'flutter',
+//    'filter[createdAt][gte]': '2024-01-01T00:00:00.000Z'}
 ```
 
 ---

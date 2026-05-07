@@ -5,7 +5,7 @@
   "packages": [
     {
       "name": "grid_flutter",
-      "version": "0.1.3",
+      "version": "0.1.4",
       "dependencies": [
         "dio",
         "flutter",
@@ -19,7 +19,7 @@
     },
     {
       "name": "grid_core",
-      "version": "0.1.3",
+      "version": "0.1.4",
       "dependencies": []
     },
     {

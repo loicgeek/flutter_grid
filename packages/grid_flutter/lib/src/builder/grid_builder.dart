@@ -42,6 +42,27 @@ class GridTableState<T> {
 
 /// Connects a [GridController] (and optionally a [GridDataSource]) to the
 /// widget tree, rebuilding whenever the controller notifies.
+///
+/// ## Fetch lifecycle
+///
+/// Every time the controller state changes (sort, filter, page, external
+/// filters…) [GridBuilder] calls [GridDataSource.fetch] with a fresh
+/// [GridQuery] built from the **latest** state.
+///
+/// ### Race-condition safety — epoch cancellation
+///
+/// Rapid successive changes (e.g. user applies a filter and immediately clicks
+/// next-page before the first response arrives) are handled via an internal
+/// epoch counter:
+///
+/// - Each new fetch increments `_epoch`.
+/// - When a response arrives it checks whether its epoch still matches the
+///   current one; if not, the response is silently discarded.
+/// - The **last issued** fetch always wins — stale responses never overwrite
+///   newer data.
+///
+/// This replaces the old `_isFetching` guard that used to silently drop
+/// state changes that arrived while a fetch was in progress.
 class GridBuilder<T> extends StatefulWidget {
   final GridController<T> controller;
   final GridDataSource<T>? dataSource;
@@ -59,16 +80,21 @@ class GridBuilder<T> extends StatefulWidget {
 }
 
 class _GridBuilderState<T> extends State<GridBuilder<T>> {
+  // ── Epoch-based cancellation ──────────────────────────────────────────────
+  //
+  // Incremented on every fetch attempt. A response whose captured epoch no
+  // longer matches _epoch is stale and discarded.
+  int _epoch = 0;
+
   bool _isLoading = false;
   String? _error;
-  bool _isFetching = false;
   StreamSubscription<List<T>>? _watchSub;
 
   @override
   void initState() {
     super.initState();
     widget.controller.addListener(_onControllerChanged);
-    _fetchIfNeeded();
+    _fetch();
   }
 
   @override
@@ -80,7 +106,8 @@ class _GridBuilderState<T> extends State<GridBuilder<T>> {
     }
     if (oldWidget.dataSource != widget.dataSource) {
       _watchSub?.cancel();
-      _fetchIfNeeded();
+      _watchSub = null;
+      _fetch();
     }
   }
 
@@ -88,60 +115,77 @@ class _GridBuilderState<T> extends State<GridBuilder<T>> {
   void dispose() {
     widget.controller.removeListener(_onControllerChanged);
     _watchSub?.cancel();
+    // Invalidate any in-flight fetch so its completion callback is a no-op.
+    _epoch++;
     super.dispose();
   }
 
   void _onControllerChanged() {
     if (mounted) {
-      _fetchIfNeeded();
+      _fetch();
       setState(() {});
     }
   }
 
-  Future<void> _fetchIfNeeded() async {
+  // ── Core fetch ────────────────────────────────────────────────────────────
+
+  Future<void> _fetch() async {
     final ds = widget.dataSource;
     if (ds == null) return;
-    // Guard against re-entrant calls triggered by setData/setDataWithPageCount
-    // notifying listeners while a fetch is already in progress.
-    if (_isFetching) return;
 
-    // Try watch first (streaming)
-    final watchStream = ds.watch(widget.controller.state.toQuery());
-    if (watchStream != null && _watchSub == null) {
-      _watchSub = watchStream.listen((data) {
-        widget.controller.setData(data);
-      });
+    // Capture the epoch for this specific fetch attempt.
+    // Any previously in-flight fetch now has a stale epoch and will be ignored
+    // when it eventually completes.
+    final epoch = ++_epoch;
+
+    // Wire up streaming watch once (only if not already subscribed).
+    if (_watchSub == null) {
+      final watchStream = ds.watch(widget.controller.state.toQuery());
+      if (watchStream != null) {
+        _watchSub = watchStream.listen((data) {
+          widget.controller.setData(data);
+        });
+      }
     }
 
-    _isFetching = true;
     if (mounted) {
       setState(() {
         _isLoading = true;
         _error = null;
       });
     }
+
     try {
+      // Snapshot the query from the **current** state at the moment this fetch
+      // was triggered. Subsequent state changes will start a new fetch with a
+      // higher epoch — their responses will win.
       final query = widget.controller.state.toQuery();
       final page = await ds.fetch(query);
+
+      // Stale check — a newer fetch was started after us; discard our result.
+      if (epoch != _epoch) return;
+
       widget.controller.setDataWithPageCountAndTotalItems(
         page.data,
         page.computedTotalPages,
         totalItems: page.totalItems,
       );
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+
+      if (mounted) setState(() => _isLoading = false);
     } catch (e) {
+      // Discard errors from stale fetches too.
+      if (epoch != _epoch) return;
+
       if (mounted) {
         setState(() {
           _isLoading = false;
           _error = e.toString();
         });
       }
-    } finally {
-      _isFetching = false;
     }
   }
+
+  // ── Build ─────────────────────────────────────────────────────────────────
 
   GridTableState<T> _buildTableState() {
     final c = widget.controller;

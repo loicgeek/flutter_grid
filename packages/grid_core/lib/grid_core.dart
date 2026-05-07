@@ -4,6 +4,7 @@ library grid_core;
 
 // Models
 export 'src/models/column_def.dart';
+export 'src/models/external_filter.dart';
 export 'src/models/grid_page.dart';
 export 'src/models/grid_query.dart';
 export 'src/models/grid_state.dart';
