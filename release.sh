@@ -51,7 +51,12 @@ if ! grep -q "build/" .pubignore; then
   echo "build/" >> .pubignore
 fi
 
-# 4. Validate sub-packages (dry-run)
+# 4. Commit changes before validation
+echo "📝 Committing version and changelog changes..."
+git add .
+git commit -m "chore: release $VERSION" --allow-empty
+
+# 5. Validate sub-packages (dry-run)
 PACKAGES=("packages/grid_core" "packages/grid_export" "packages/grid_flutter" "packages/grid_ui")
 
 for PKG in "${PACKAGES[@]}"; do
