@@ -86,6 +86,14 @@ class _GridBuilderState<T> extends State<GridBuilder<T>> {
   // longer matches _epoch is stale and discarded.
   int _epoch = 0;
 
+  // ── Re-entrancy guard ─────────────────────────────────────────────────────
+  //
+  // setDataWithPageCountAndTotalItems() calls _notifyListeners() synchronously,
+  // which would immediately trigger _onControllerChanged() → _fetch() → infinite
+  // loop. We raise this flag before calling setData and check it at the top of
+  // _onControllerChanged to break the cycle.
+  bool _settingData = false;
+
   bool _isLoading = false;
   String? _error;
   StreamSubscription<List<T>>? _watchSub;
@@ -121,6 +129,7 @@ class _GridBuilderState<T> extends State<GridBuilder<T>> {
   }
 
   void _onControllerChanged() {
+    if (_settingData) return;
     if (mounted) {
       _fetch();
       setState(() {});
@@ -165,11 +174,13 @@ class _GridBuilderState<T> extends State<GridBuilder<T>> {
       // Stale check — a newer fetch was started after us; discard our result.
       if (epoch != _epoch) return;
 
+      _settingData = true;
       widget.controller.setDataWithPageCountAndTotalItems(
         page.data,
         page.computedTotalPages,
         totalItems: page.totalItems,
       );
+      _settingData = false;
 
       if (mounted) setState(() => _isLoading = false);
     } catch (e) {
