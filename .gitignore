@@ -1,0 +1,34 @@
+# ── Dart / Flutter ────────────────────────────────────────────────────────────
+.dart_tool/
+.pub-cache/
+.pub/
+**/pubspec.lock
+**/doc/api/
+
+# Build artefacts (all packages + example app)
+**/build/
+**/coverage/
+
+# Flutter-generated files
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/ios/Flutter/.last_build_id
+**/*.g.dart
+**/*.freezed.dart
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+*.swo
+
+# ── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Symbolication / Obfuscation ───────────────────────────────────────────────
+app.*.symbols
+app.*.map.json
