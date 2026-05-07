@@ -83,9 +83,18 @@ if ! grep -q "build/" .pubignore; then
   echo "build/" >> .pubignore
 fi
 
-# 4. Commit changes before validation
-echo "📝 Committing version and changelog changes..."
-git add .
+# 4. Run pub get in all packages to update locks before committing
+echo "📝 Updating pubspec.lock files..."
+for PKG in "${PACKAGES[@]}"; do
+  pushd "$PKG" > /dev/null
+  flutter pub get > /dev/null || echo "⚠️  Warning: pub get failed in $PKG (expected if dependencies not yet published)"
+  popd > /dev/null
+done
+flutter pub get > /dev/null || echo "⚠️  Warning: pub get failed in root"
+
+# 5. Commit changes before validation
+echo "📝 Committing all changes (including locks)..."
+git add -A
 git commit -m "chore: release $VERSION" --allow-empty
 
 # Function to swap path dependencies to versioned ones
