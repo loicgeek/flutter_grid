@@ -158,8 +158,14 @@ class GridController<T> {
 
       // Filter
       SetGlobalFilterCommand c => c.filter == null || c.filter!.isEmpty
-          ? state.copyWith(clearGlobalFilter: true)
-          : state.copyWith(globalFilter: c.filter),
+          ? state.copyWith(
+              clearGlobalFilter: true,
+              pagination: state.pagination.copyWith(pageIndex: 0),
+            )
+          : state.copyWith(
+              globalFilter: c.filter,
+              pagination: state.pagination.copyWith(pageIndex: 0),
+            ),
       SetColumnFilterCommand c => state.copyWith(
           columnFilters: {...state.columnFilters, c.columnId: c.value},
           pagination: state.pagination.copyWith(pageIndex: 0),

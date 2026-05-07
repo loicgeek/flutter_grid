@@ -552,6 +552,32 @@ void main() {
       final q = c.state.toQuery();
       expect(q.externalFilters['userId']?.value, 42);
     });
+
+    // ── global filter page-reset (regression) ──────────────────────────────
+
+    test('setGlobalFilter resets pageIndex to 0', () {
+      final c = _makeController();
+      c.nextPage(); // move to page 1
+      expect(c.state.pagination.pageIndex, 1);
+      c.setGlobalFilter('alice');
+      expect(c.state.pagination.pageIndex, 0);
+    });
+
+    test('setGlobalFilter with empty string resets pageIndex to 0', () {
+      final c = _makeController();
+      c.setGlobalFilter('something');
+      c.nextPage();
+      c.setGlobalFilter(''); // clear via empty string
+      expect(c.state.pagination.pageIndex, 0);
+    });
+
+    test('setGlobalFilter with null resets pageIndex to 0', () {
+      final c = _makeController();
+      c.setGlobalFilter('something');
+      c.nextPage();
+      c.setGlobalFilter(null);
+      expect(c.state.pagination.pageIndex, 0);
+    });
   });
 
   // ──────────────────────────────────────────────────────────────────────────

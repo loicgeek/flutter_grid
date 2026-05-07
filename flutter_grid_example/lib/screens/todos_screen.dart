@@ -114,53 +114,53 @@ class _TodosScreenState extends State<TodosScreen> {
       (ctx as CellContext<Todo, Object?>).row.original;
 
   List<ColumnDef<Todo, dynamic>> _buildColumns() => [
-        ColumnDef<Todo, int>.accessor(
-          id: 'id',
-          accessorFn: (t) => t.id,
-          header: '#',
-          size: 90,
-          enableSorting: false,
-          cell: (ctx) => Text(
-            '${_todo(ctx).id}',
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: _brandDark,
-            ),
-          ),
+    ColumnDef<Todo, int>.accessor(
+      id: 'id',
+      accessorFn: (t) => t.id,
+      header: '#',
+      size: 90,
+      enableSorting: false,
+      cell: (ctx) => Text(
+        '${_todo(ctx).id}',
+        style: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: _brandDark,
         ),
-        ColumnDef<Todo, String>.accessor(
-          id: 'todo',
-          accessorFn: (t) => t.todo,
-          header: 'TÂCHE',
-          enableSorting: false,
-          cell: (ctx) => Text(
-            _todo(ctx).todo,
-            style: const TextStyle(fontSize: 13, color: _textPrimary),
-            overflow: TextOverflow.ellipsis,
-            maxLines: 2,
-          ),
-        ),
-        ColumnDef<Todo, bool>.accessor(
-          id: 'completed',
-          accessorFn: (t) => t.completed,
-          header: 'STATUT',
-          size: 120,
-          enableSorting: false,
-          cell: (ctx) => _StatusBadge(completed: _todo(ctx).completed),
-        ),
-        ColumnDef<Todo, int>.accessor(
-          id: 'userId',
-          accessorFn: (t) => t.userId,
-          header: 'USER ID',
-          size: 90,
-          enableSorting: false,
-          cell: (ctx) => Text(
-            'U-${_todo(ctx).userId}',
-            style: const TextStyle(fontSize: 13, color: _textSecondary),
-          ),
-        ),
-      ];
+      ),
+    ),
+    ColumnDef<Todo, String>.accessor(
+      id: 'todo',
+      accessorFn: (t) => t.todo,
+      header: 'TÂCHE',
+      enableSorting: false,
+      cell: (ctx) => Text(
+        _todo(ctx).todo,
+        style: const TextStyle(fontSize: 13, color: _textPrimary),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 2,
+      ),
+    ),
+    ColumnDef<Todo, bool>.accessor(
+      id: 'completed',
+      accessorFn: (t) => t.completed,
+      header: 'STATUT',
+      size: 120,
+      enableSorting: false,
+      cell: (ctx) => _StatusBadge(completed: _todo(ctx).completed),
+    ),
+    ColumnDef<Todo, int>.accessor(
+      id: 'userId',
+      accessorFn: (t) => t.userId,
+      header: 'USER ID',
+      size: 90,
+      enableSorting: false,
+      cell: (ctx) => Text(
+        'U-${_todo(ctx).userId}',
+        style: const TextStyle(fontSize: 13, color: _textSecondary),
+      ),
+    ),
+  ];
 
   // ── Build ─────────────────────────────────────────────────────────────────
 
@@ -184,10 +184,7 @@ class _TodosScreenState extends State<TodosScreen> {
                   // Status toggle
                   _SectionLabel(label: 'Statut'),
                   const SizedBox(height: 8),
-                  _StatusToggle(
-                    value: _activeStatus,
-                    onChanged: _setStatus,
-                  ),
+                  _StatusToggle(value: _activeStatus, onChanged: _setStatus),
                   const SizedBox(height: 16),
                   // User ID filter
                   _SectionLabel(label: 'User ID'),
@@ -262,10 +259,7 @@ class _PageHeader extends StatelessWidget {
   final bool hasActiveFilters;
   final VoidCallback onReset;
 
-  const _PageHeader({
-    required this.hasActiveFilters,
-    required this.onReset,
-  });
+  const _PageHeader({required this.hasActiveFilters, required this.onReset});
 
   @override
   Widget build(BuildContext context) {
@@ -424,8 +418,10 @@ class _UserIdFilter extends StatelessWidget {
             decoration: InputDecoration(
               hintText: 'ex: 5',
               hintStyle: TextStyle(fontSize: 13, color: _textMuted),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 10,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(color: _borderColor),
@@ -454,7 +450,10 @@ class _UserIdFilter extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
             ),
-            textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+            textStyle: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           child: const Text('Filtrer'),
         ),

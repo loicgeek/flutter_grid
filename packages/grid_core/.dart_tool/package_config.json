@@ -296,10 +296,9 @@
       "languageVersion": "3.3"
     }
   ],
-  "generated": "2026-05-07T10:15:16.398738Z",
   "generator": "pub",
-  "generatorVersion": "3.7.0",
-  "flutterRoot": "file:///Users/loic/fvm/versions/3.29.0",
-  "flutterVersion": "3.29.0",
+  "generatorVersion": "3.11.4",
+  "flutterRoot": "file:///Users/loic/fvm/versions/3.41.6",
+  "flutterVersion": "3.41.6",
   "pubCache": "file:///Users/loic/.pub-cache"
 }
