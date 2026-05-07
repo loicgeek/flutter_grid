@@ -54,26 +54,41 @@ class GridBulkActionBar<T> extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Row(
             children: [
-              Text(
-                selectAllPages
-                    ? 'All $totalRows items selected'
-                    : '$selectedCount selected',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+              // Leading section: selection count + optional "select all" button.
+              // Wrapped in Expanded so it never forces the outer Row to overflow
+              // regardless of button label length or available screen width.
+              Expanded(
+                child: Row(
+                  children: [
+                    Text(
+                      selectAllPages
+                          ? 'All $totalRows items selected'
+                          : '$selectedCount items selected',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color:
+                            Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                    if (enableSelectAllPages &&
+                        !selectAllPages &&
+                        selectedCount == rowModels.pageRows.length &&
+                        totalRows > selectedCount) ...[
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: TextButton(
+                          onPressed: () => controller.selectAllPages(true),
+                          child: Text(
+                            'Select all $totalRows items across all pages',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-              if (enableSelectAllPages &&
-                  !selectAllPages &&
-                  selectedCount == rowModels.pageRows.length &&
-                  totalRows > selectedCount) ...[
-                const SizedBox(width: 8),
-                TextButton(
-                  onPressed: () => controller.selectAllPages(true),
-                  child: Text('Select all $totalRows items'),
-                ),
-              ],
-              const SizedBox(width: 16),
+              const SizedBox(width: 8),
               ...actions.map((action) => Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: TextButton.icon(
@@ -87,7 +102,6 @@ class GridBulkActionBar<T> extends StatelessWidget {
                       ),
                     ),
                   )),
-              const Spacer(),
               TextButton(
                 onPressed: () => controller.clearRowSelection(),
                 child: const Text('Clear selection'),

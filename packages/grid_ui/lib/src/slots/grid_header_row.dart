@@ -178,8 +178,10 @@ class GridHeaderRow<T> extends StatelessWidget {
         final end =
             (visibleCursor + header.colSpan).clamp(0, visibleColumns.length);
         for (int i = visibleCursor; i < end; i++) {
-          width +=
-              columnWidths?[visibleColumns[i].id] ?? theme.defaultColumnWidth;
+          width += (columnWidths?[visibleColumns[i].id] ??
+                  visibleColumns[i].effectiveWidth ??
+                  theme.defaultColumnWidth)
+              .toDouble();
         }
         visibleCursor = end;
 

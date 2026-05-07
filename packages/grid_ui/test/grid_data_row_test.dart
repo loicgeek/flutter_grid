@@ -39,6 +39,10 @@ GridController<_Person> _makeController() {
 
 Widget _wrap(Widget child, {GridThemeData? themeData}) {
   return MaterialApp(
+    // InkSparkle (the default in Flutter ≥3.3) loads a GLSL shader that cannot
+    // be decoded in the test VM. Use the software-only InkRipple instead so
+    // InkWell / GestureDetector taps work without crashing.
+    theme: ThemeData(splashFactory: InkRipple.splashFactory),
     home: Scaffold(
       body:
           themeData != null ? GridTheme(data: themeData, child: child) : child,
@@ -68,14 +72,13 @@ void main() {
         ),
       ));
 
-      // Two SizedBox cells — one per column
-      expect(
-        find.descendant(
-          of: find.byType(Row),
-          matching: find.byType(SizedBox),
-        ),
-        findsNWidgets(visibleCols.length),
-      );
+      // GridDataRow uses a Stack (not Row) so that pinned columns can be
+      // Positioned independently. Count leaf SizedBoxes by their column widths.
+      final cellBoxes = tester
+          .widgetList<SizedBox>(find.byType(SizedBox))
+          .where((b) => b.width == 120 || b.width == 80)
+          .toList();
+      expect(cellBoxes.length, visibleCols.length);
     });
 
     testWidgets('uses rowBackground by default', (tester) async {
@@ -287,14 +290,12 @@ void main() {
         ),
       ));
 
-      // Only 1 visible column remains
-      expect(
-        find.descendant(
-          of: find.byType(Row),
-          matching: find.byType(SizedBox),
-        ),
-        findsOneWidget,
-      );
+      // Only the 'name' column (width 120) remains; 'age' (width 80) is hidden.
+      final cellBoxes = tester
+          .widgetList<SizedBox>(find.byType(SizedBox))
+          .where((b) => b.width == 120 || b.width == 80)
+          .toList();
+      expect(cellBoxes.length, 1);
     });
   });
 }

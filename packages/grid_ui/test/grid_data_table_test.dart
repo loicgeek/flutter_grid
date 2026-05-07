@@ -44,6 +44,9 @@ GridTableState<_Item> _buildTableState(GridController<_Item> c) {
 
 Widget _wrap(Widget child, {double screenWidth = 800}) {
   return MaterialApp(
+    // InkSparkle loads a GLSL shader that fails to decode in the test VM.
+    // Use the software-only InkRipple to keep tap events working.
+    theme: ThemeData(splashFactory: InkRipple.splashFactory),
     home: Scaffold(
       body: SizedBox(width: screenWidth, child: child),
     ),

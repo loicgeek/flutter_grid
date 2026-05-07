@@ -3,7 +3,7 @@
   "packages": [
     {
       "name": "async",
-      "rootUri": "file:///Users/loic/.pub-cache/hosted/pub.dev/async-2.13.1",
+      "rootUri": "file:///Users/loic/.pub-cache/hosted/pub.dev/async-2.12.0",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
@@ -183,21 +183,21 @@
     },
     {
       "name": "shared_preferences",
-      "rootUri": "file:///Users/loic/.pub-cache/hosted/pub.dev/shared_preferences-2.5.5",
+      "rootUri": "file:///Users/loic/.pub-cache/hosted/pub.dev/shared_preferences-2.5.3",
       "packageUri": "lib/",
-      "languageVersion": "3.9"
+      "languageVersion": "3.5"
     },
     {
       "name": "shared_preferences_android",
-      "rootUri": "file:///Users/loic/.pub-cache/hosted/pub.dev/shared_preferences_android-2.4.23",
+      "rootUri": "file:///Users/loic/.pub-cache/hosted/pub.dev/shared_preferences_android-2.4.13",
       "packageUri": "lib/",
-      "languageVersion": "3.9"
+      "languageVersion": "3.7"
     },
     {
       "name": "shared_preferences_foundation",
-      "rootUri": "file:///Users/loic/.pub-cache/hosted/pub.dev/shared_preferences_foundation-2.5.6",
+      "rootUri": "file:///Users/loic/.pub-cache/hosted/pub.dev/shared_preferences_foundation-2.5.4",
       "packageUri": "lib/",
-      "languageVersion": "3.9"
+      "languageVersion": "3.4"
     },
     {
       "name": "shared_preferences_linux",
@@ -207,9 +207,9 @@
     },
     {
       "name": "shared_preferences_platform_interface",
-      "rootUri": "file:///Users/loic/.pub-cache/hosted/pub.dev/shared_preferences_platform_interface-2.4.2",
+      "rootUri": "file:///Users/loic/.pub-cache/hosted/pub.dev/shared_preferences_platform_interface-2.4.1",
       "packageUri": "lib/",
-      "languageVersion": "3.9"
+      "languageVersion": "3.2"
     },
     {
       "name": "shared_preferences_web",
@@ -231,7 +231,7 @@
     },
     {
       "name": "source_span",
-      "rootUri": "file:///Users/loic/.pub-cache/hosted/pub.dev/source_span-1.10.2",
+      "rootUri": "file:///Users/loic/.pub-cache/hosted/pub.dev/source_span-1.10.1",
       "packageUri": "lib/",
       "languageVersion": "3.1"
     },
@@ -279,9 +279,9 @@
     },
     {
       "name": "vm_service",
-      "rootUri": "file:///Users/loic/.pub-cache/hosted/pub.dev/vm_service-15.2.0",
+      "rootUri": "file:///Users/loic/.pub-cache/hosted/pub.dev/vm_service-14.3.1",
       "packageUri": "lib/",
-      "languageVersion": "3.5"
+      "languageVersion": "3.3"
     },
     {
       "name": "web",

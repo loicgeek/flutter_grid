@@ -35,7 +35,12 @@ GridController<_Item> _makeController() {
 }
 
 Widget _wrap(Widget child) {
-  return MaterialApp(home: Scaffold(body: child));
+  // InkSparkle (default ≥Flutter 3.3) loads a GLSL shader that fails to decode
+  // in the test VM. Use InkRipple (software-only) to keep Chip taps working.
+  return MaterialApp(
+    theme: ThemeData(splashFactory: InkRipple.splashFactory),
+    home: Scaffold(body: child),
+  );
 }
 
 void main() {

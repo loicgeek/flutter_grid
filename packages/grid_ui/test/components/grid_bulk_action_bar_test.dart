@@ -8,6 +8,12 @@ void main() {
   testWidgets(
       'GridBulkActionBar shows normal count and select all pages button when enabled',
       (WidgetTester tester) async {
+    // Use a wide screen so the "Select all … across all pages" label is fully
+    // visible and doesn't get ellipsized (Material 3 buttons have larger
+    // default padding than Material 2).
+    await tester.binding.setSurfaceSize(const Size(1200, 600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
     final controller = GridController<String>(
       options: GridOptions(
         columns: const [],
@@ -25,6 +31,8 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        // InkSparkle loads a GLSL shader that fails to decode in the test VM.
+        theme: ThemeData(splashFactory: InkRipple.splashFactory),
         home: Scaffold(
           body: GridTheme(
             data: const GridThemeData(),

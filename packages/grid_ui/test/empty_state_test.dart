@@ -4,7 +4,12 @@ import 'package:grid_ui/src/slots/grid_empty_state.dart';
 import 'package:grid_ui/src/slots/grid_slots.dart';
 
 Widget _wrap(Widget child) {
-  return MaterialApp(home: Scaffold(body: child));
+  // InkSparkle (default ≥Flutter 3.3) loads a GLSL shader that fails to decode
+  // in the test VM. Use InkRipple (software-only) to keep button taps working.
+  return MaterialApp(
+    theme: ThemeData(splashFactory: InkRipple.splashFactory),
+    home: Scaffold(body: child),
+  );
 }
 
 void main() {
