@@ -3,7 +3,7 @@ description: >-
   Pre-built UI layer for ntech_grid. Ships FlutterGrid, GridDataTable,
   GridTheme, GridSlots, built-in cell renderers (badge, avatar, progress, link,
   money, date, boolean…), toolbar, search, and pagination widgets.
-version: 0.1.3
+version: 0.1.4
 repository: https://github.com/loicgeek/flutter_grid/tree/main/packages/grid_ui
 issue_tracker: https://github.com/loicgeek/flutter_grid/issues
 homepage: https://github.com/loicgeek/flutter_grid

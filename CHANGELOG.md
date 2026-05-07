@@ -2,6 +2,10 @@
 
 All notable changes to `ntech_grid` are documented here.
 
+## 0.1.4 - 2026-05-07
+
+* Internal release bump.
+
 ## 0.1.3 - 2026-05-07
 
 ### Added
