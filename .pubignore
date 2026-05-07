@@ -8,3 +8,4 @@ packages/grid_ui/test_cache/
 
 # Local development overrides
 pubspec_overrides.yaml
+build/
